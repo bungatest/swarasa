@@ -1,0 +1,3689 @@
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SWARASA — Portal Pengguna</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&amp;display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="db.js"></script>
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --teal: #0d9e75;
+            --teal-light: #e1f5ee;
+            --teal-mid: #1db98a;
+            --teal-dark: #0a7a5c;
+            --blue-primary: #1565C0;
+            --blue-light: #e3eeff;
+            --blue-mid: #2979ff;
+            --coral: #D85A30;
+            --coral-light: #FAECE7;
+            --danger: #D32F2F;
+            --danger-light: #FFEBEE;
+            --warning: #F57F17;
+            --warning-light: #FFFDE7;
+            --success: #2E7D32;
+            --success-light: #E8F5E9;
+            --text-primary: #111827;
+            --text-secondary: #6B7280;
+            --text-muted: #9CA3AF;
+            --bg-page: #F3F6FA;
+            --bg-white: #ffffff;
+            --bg-card: #ffffff;
+            --border: #E5E7EB;
+            --border-mid: #D1D5DB;
+            --sidebar-w: 220px;
+            --header-h: 56px;
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+            --radius-xl: 20px;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.07), 0 1px 2px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+            --transition: 180ms ease;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg-page);
+            color: var(--text-primary);
+            min-height: 100vh;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* ── OFFLINE BANNER ── */
+        #offline-banner {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 9999;
+            background: #F9A825;
+            color: #4a3200;
+            height: 40px;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 500;
+            gap: 8px;
+        }
+
+        #offline-banner.show {
+            display: flex;
+        }
+
+        /* ── TOPBAR ── */
+        .topbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 200;
+            height: var(--header-h);
+            background: var(--blue-primary);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 12px;
+        }
+
+        .topbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: var(--sidebar-w);
+        }
+
+        .brand-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-sm);
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .brand-icon i {
+            color: #fff;
+            font-size: 16px;
+        }
+
+        .brand-name {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 700;
+            font-size: 15px;
+            color: #fff;
+            letter-spacing: -0.3px;
+        }
+
+        .brand-sub {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.65);
+            font-weight: 400;
+        }
+
+        .topbar-location {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .location-pill {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 5px 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .location-pill i {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .topbar-btn {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            position: relative;
+            transition: background var(--transition);
+        }
+
+        .topbar-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .topbar-btn i {
+            font-size: 16px;
+        }
+
+        .badge-notif {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #F9A825;
+            color: #4a3200;
+            font-size: 9px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--blue-primary);
+        }
+
+        .avatar-btn {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.25);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ── DROPDOWN ── */
+        .dropdown {
+            position: absolute;
+            top: calc(var(--header-h) + 10px);
+            right: 20px;
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            width: 220px;
+            box-shadow: var(--shadow-md);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .dropdown.show {
+            display: flex;
+            animation: slideDown 0.2s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dropdown-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-page);
+        }
+
+        .dropdown-name {
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .dropdown-role {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .dropdown-item {
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+            background: var(--bg-page);
+            color: var(--text-primary);
+        }
+
+        .dropdown-item i {
+            width: 16px;
+            text-align: center;
+        }
+
+        .dropdown-item.text-danger {
+            color: var(--danger);
+        }
+
+        .dropdown-item.text-danger:hover {
+            background: var(--danger-light);
+        }
+
+        /* ── LAYOUT ── */
+        .app-layout {
+            display: flex;
+            padding-top: var(--header-h);
+            min-height: 100vh;
+            align-items: flex-start;
+        }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: var(--sidebar-w);
+            background: var(--bg-white);
+            border-right: 1px solid var(--border);
+            position: fixed;
+            top: var(--header-h);
+            left: 0;
+            bottom: 0;
+            overflow-y: auto;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            padding: 16px 0;
+            height: calc(100vh - var(--header-h));
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        .sidebar-section-label {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            padding: 0 16px 6px;
+            margin-top: 12px;
+        }
+
+        .sidebar-section-label:first-child {
+            margin-top: 0;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            cursor: pointer;
+            border-radius: 0;
+            transition: background var(--transition), color var(--transition);
+            color: var(--text-secondary);
+            font-size: 13.5px;
+            font-weight: 500;
+            position: relative;
+            text-decoration: none;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-page);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: var(--blue-light);
+            color: var(--blue-primary);
+            border-right: 3px solid var(--blue-primary);
+        }
+
+        .nav-item i {
+            font-size: 16px;
+            width: 18px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .nav-badge {
+            margin-left: auto;
+            background: var(--blue-primary);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
+
+        .nav-badge.warning {
+            background: var(--warning);
+            color: #fff;
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+            padding: 12px 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .hotline-card {
+            background: var(--blue-light);
+            border-radius: var(--radius-md);
+            padding: 10px 12px;
+        }
+
+        .hotline-card p {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 2px;
+        }
+
+        .hotline-card .hotline-num {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--blue-primary);
+        }
+
+        .hotline-card i {
+            color: var(--blue-primary);
+            margin-right: 4px;
+        }
+
+        /* ── MAIN CONTENT ── */
+        .main-content {
+            margin-left: var(--sidebar-w);
+            flex: 1;
+            padding: 24px;
+            min-height: 0;
+            width: calc(100% - var(--sidebar-w));
+        }
+
+        /* ── PAGE ── */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+            padding-bottom: 32px;
+        }
+
+        /* ── PAGE HEADER ── */
+        .page-header {
+            margin-bottom: 20px;
+        }
+
+        .page-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.4px;
+            margin-bottom: 2px;
+        }
+
+        .page-sub {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        /* ── AI BADGE ── */
+        .ai-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: linear-gradient(135deg, #e8f4ff, #dff2ea);
+            border: 1px solid #b3d9f7;
+            border-radius: 20px;
+            padding: 3px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--blue-primary);
+            margin-bottom: 16px;
+        }
+
+        .ai-badge i {
+            font-size: 11px;
+            color: var(--teal);
+        }
+
+        /* ── HERO BANNER ── */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--blue-primary) 0%, #1976D2 50%, #1565C0 100%);
+            border-radius: var(--radius-lg);
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -30px;
+            right: -30px;
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            bottom: -40px;
+            right: 80px;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .hero-text h2 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .hero-text p {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.75);
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 24px;
+        }
+
+        .hero-stat {
+            text-align: center;
+        }
+
+        .hero-stat .val {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+            display: block;
+        }
+
+        .hero-stat .lbl {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.65);
+        }
+
+        /* ── KPI CARDS ── */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .kpi-card {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            transition: box-shadow var(--transition);
+        }
+
+        .kpi-card:hover {
+            box-shadow: var(--shadow-sm);
+        }
+
+        .kpi-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .kpi-icon i {
+            font-size: 18px;
+        }
+
+        .kpi-icon.blue {
+            background: var(--blue-light);
+        }
+
+        .kpi-icon.blue i {
+            color: var(--blue-primary);
+        }
+
+        .kpi-icon.green {
+            background: var(--success-light);
+        }
+
+        .kpi-icon.green i {
+            color: var(--success);
+        }
+
+        .kpi-icon.orange {
+            background: #FFF3E0;
+        }
+
+        .kpi-icon.orange i {
+            color: #E65100;
+        }
+
+        .kpi-val {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1;
+        }
+
+        .kpi-lbl {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        /* ── SECTION TITLE ── */
+        .section-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title i {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* ── STATUS TRACKER ── */
+        .tracker-card {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 18px 20px;
+            margin-bottom: 20px;
+        }
+
+        .tracker-id {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .tracker-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .tracker-meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        .tracker-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #FFF8E1;
+            color: #E65100;
+            border: 1px solid #FFCC02;
+            border-radius: 20px;
+            padding: 3px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            float: right;
+            margin-top: -2px;
+        }
+
+        .tracker-steps {
+            display: flex;
+            align-items: center;
+            gap: 0;
+        }
+
+        .tracker-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+
+        .step-circle {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            border: 2px solid;
+            transition: all var(--transition);
+        }
+
+        .step-circle.done {
+            background: var(--blue-primary);
+            border-color: var(--blue-primary);
+            color: #fff;
+        }
+
+        .step-circle.active {
+            background: #ff6d00;
+            border-color: #ff6d00;
+            color: #fff;
+        }
+
+        .step-circle.pending {
+            background: #fff;
+            border-color: var(--border-mid);
+            color: var(--text-muted);
+        }
+
+        .step-label {
+            font-size: 10px;
+            color: var(--text-secondary);
+            margin-top: 6px;
+            text-align: center;
+        }
+
+        .step-label.active-lbl {
+            color: #ff6d00;
+            font-weight: 600;
+        }
+
+        .step-connector {
+            flex: 1;
+            height: 2px;
+            background: var(--border);
+            align-self: center;
+            margin-bottom: 18px;
+        }
+
+        .step-connector.done {
+            background: var(--blue-primary);
+        }
+
+        /* ── INFO CARDS ── */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .info-card {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+        }
+
+        .info-card-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .info-card-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: var(--radius-sm);
+            background: var(--teal-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .info-card-icon i {
+            font-size: 14px;
+            color: var(--teal-dark);
+        }
+
+        .info-card-icon.orange {
+            background: #FFF3E0;
+        }
+
+        .info-card-icon.orange i {
+            color: #E65100;
+        }
+
+        .info-card-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .info-card-sub {
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+
+        .menu-items {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .menu-item {
+            font-size: 13px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .menu-item i {
+            font-size: 10px;
+            color: var(--teal);
+        }
+
+        .menu-warning {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--warning-light);
+            color: var(--warning);
+            border-radius: 4px;
+            padding: 3px 7px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .vendor-info .vendor-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .vendor-info .vendor-score {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--success-light);
+            color: var(--success);
+            border-radius: 4px;
+            padding: 2px 7px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .vendor-rating {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 6px;
+        }
+
+        /* ── FOOTER ── */
+        .page-footer {
+            border-top: 1px solid var(--border);
+            padding-top: 12px;
+            margin-top: 8px;
+            font-size: 11px;
+            color: var(--text-muted);
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .page-footer span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .page-footer i {
+            color: var(--teal);
+            font-size: 10px;
+        }
+
+        /* ── FORM PAGE ── */
+        .form-card {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+        }
+
+        .form-card-header {
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .form-card-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .form-card-sub {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .form-input {
+            height: 42px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0 12px;
+            font-size: 14px;
+            font-family: inherit;
+            color: var(--text-primary);
+            background: var(--bg-white);
+            transition: border-color var(--transition);
+            outline: none;
+        }
+
+        .form-input:focus {
+            border-color: var(--blue-primary);
+            box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.1);
+        }
+
+        .form-textarea {
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 10px 12px;
+            font-size: 14px;
+            font-family: inherit;
+            color: var(--text-primary);
+            background: var(--bg-white);
+            transition: border-color var(--transition);
+            outline: none;
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        .form-textarea:focus {
+            border-color: var(--blue-primary);
+            box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.1);
+        }
+
+        .form-select {
+            height: 42px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0 12px;
+            font-size: 14px;
+            font-family: inherit;
+            color: var(--text-primary);
+            background: var(--bg-white);
+            appearance: none;
+            cursor: pointer;
+            outline: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 32px;
+        }
+
+        .form-select:focus {
+            border-color: var(--blue-primary);
+        }
+
+        /* Star Rating */
+        .star-rating {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .star-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 2px;
+            font-size: 28px;
+            color: #D1D5DB;
+            transition: color var(--transition), transform var(--transition);
+            line-height: 1;
+        }
+
+        .star-btn:hover,
+        .star-btn.filled {
+            color: #F9A825;
+        }
+
+        .star-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .star-hint {
+            font-size: 12px;
+            color: var(--teal);
+            font-weight: 500;
+            margin-left: 8px;
+        }
+
+        /* Problem Chips */
+        .problem-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .problem-chip {
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1.5px solid var(--border);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition);
+            background: var(--bg-white);
+            color: var(--text-secondary);
+            user-select: none;
+        }
+
+        .problem-chip:hover {
+            border-color: var(--blue-primary);
+            color: var(--blue-primary);
+        }
+
+        .problem-chip.selected {
+            background: var(--blue-light);
+            border-color: var(--blue-primary);
+            color: var(--blue-primary);
+        }
+
+        /* Photo Upload */
+        .photo-zone {
+            border: 2px dashed var(--border-mid);
+            border-radius: var(--radius-md);
+            padding: 32px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color var(--transition), background var(--transition);
+            background: var(--bg-page);
+        }
+
+        .photo-zone:hover {
+            border-color: var(--blue-primary);
+            background: var(--blue-light);
+        }
+
+        .photo-zone i {
+            font-size: 36px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .photo-zone p {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .photo-zone small {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .photo-zone .photo-hint {
+            font-size: 11px;
+            color: var(--teal);
+            margin-top: 4px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            height: 48px;
+            background: var(--blue-primary);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background var(--transition);
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .submit-btn:hover {
+            background: #0D47A1;
+        }
+
+        .submit-btn i {
+            font-size: 16px;
+        }
+
+        /* ── RIWAYAT PAGE ── */
+        .stats-mini {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .stat-mini-card {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 14px 16px;
+            text-align: center;
+        }
+
+        .stat-mini-val {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            display: block;
+        }
+
+        .stat-mini-lbl {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .stat-mini-val.blue {
+            color: var(--blue-primary);
+        }
+
+        .stat-mini-val.orange {
+            color: #E65100;
+        }
+
+        .stat-mini-val.green {
+            color: var(--success);
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+
+        .filter-tab {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1.5px solid var(--border);
+            background: var(--bg-white);
+            color: var(--text-secondary);
+            transition: all var(--transition);
+        }
+
+        .filter-tab.active {
+            background: var(--blue-primary);
+            border-color: var(--blue-primary);
+            color: #fff;
+        }
+
+        .report-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .report-card {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px 18px;
+            transition: box-shadow var(--transition);
+        }
+
+        .report-card:hover {
+            box-shadow: var(--shadow-sm);
+        }
+
+        .report-card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .report-card-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-right: 10px;
+        }
+
+        .report-card-icon.negative {
+            background: var(--danger-light);
+        }
+
+        .report-card-icon.negative i {
+            color: var(--danger);
+        }
+
+        .report-card-icon.positive {
+            background: var(--success-light);
+        }
+
+        .report-card-icon.positive i {
+            color: var(--success);
+        }
+
+        .report-card-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .report-card-id {
+            font-size: 10px;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-top: 1px;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .status-pill.diproses {
+            background: #FFF8E1;
+            color: #E65100;
+            border: 1px solid #FFE082;
+        }
+
+        .status-pill.selesai {
+            background: var(--success-light);
+            color: var(--success);
+            border: 1px solid #A5D6A7;
+        }
+
+        .sentiment-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .sentiment-badge.neg {
+            background: var(--danger-light);
+            color: var(--danger);
+        }
+
+        .sentiment-badge.pos {
+            background: var(--success-light);
+            color: var(--success);
+        }
+
+        .report-body {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin: 8px 0;
+            line-height: 1.5;
+        }
+
+        .report-tags {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .report-tag {
+            padding: 3px 9px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            background: var(--bg-page);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        .report-tag.blue {
+            background: var(--blue-light);
+            color: var(--blue-primary);
+            border-color: #BBDEFB;
+        }
+
+        .report-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-small {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1.5px solid;
+            transition: all var(--transition);
+            text-decoration: none;
+        }
+
+        .btn-small.outline-blue {
+            border-color: #BBDEFB;
+            color: var(--blue-primary);
+            background: var(--blue-light);
+        }
+
+        .btn-small.outline-blue:hover {
+            background: #BBDEFB;
+        }
+
+        .btn-small.outline-green {
+            border-color: #A5D6A7;
+            color: var(--success);
+            background: var(--success-light);
+        }
+
+        .btn-small.outline-teal {
+            border-color: #9FE1CB;
+            color: var(--teal-dark);
+            background: var(--teal-light);
+        }
+
+        .confidence-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 2px;
+        }
+
+        .confidence-track {
+            flex: 1;
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            max-width: 80px;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            border-radius: 2px;
+            background: var(--blue-primary);
+        }
+
+        /* ── NOTIFIKASI PAGE ── */
+        .notif-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .mark-all-btn {
+            padding: 5px 12px;
+            border-radius: var(--radius-sm);
+            border: 1.5px solid var(--border);
+            background: var(--bg-white);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all var(--transition);
+        }
+
+        .mark-all-btn:hover {
+            border-color: var(--blue-primary);
+            color: var(--blue-primary);
+        }
+
+        .notif-card {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .notif-item {
+            display: flex;
+            gap: 14px;
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border);
+            transition: background var(--transition);
+            position: relative;
+        }
+
+        .notif-item:last-child {
+            border-bottom: none;
+        }
+
+        .notif-item:hover {
+            background: var(--bg-page);
+        }
+
+        .notif-item.unread {
+            background: #EFF6FF;
+        }
+
+        .notif-unread-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--blue-primary);
+            position: absolute;
+            left: 8px;
+            top: 18px;
+            flex-shrink: 0;
+        }
+
+        .notif-icon-wrap {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-sm);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .notif-icon-wrap.orange {
+            background: #FFF3E0;
+        }
+
+        .notif-icon-wrap.orange i {
+            color: #E65100;
+            font-size: 16px;
+        }
+
+        .notif-icon-wrap.teal {
+            background: var(--teal-light);
+        }
+
+        .notif-icon-wrap.teal i {
+            color: var(--teal-dark);
+            font-size: 16px;
+        }
+
+        .notif-icon-wrap.green {
+            background: var(--success-light);
+        }
+
+        .notif-icon-wrap.green i {
+            color: var(--success);
+            font-size: 16px;
+        }
+
+        .notif-icon-wrap.blue {
+            background: var(--blue-light);
+        }
+
+        .notif-icon-wrap.blue i {
+            color: var(--blue-primary);
+            font-size: 16px;
+        }
+
+        .notif-icon-wrap.gray {
+            background: var(--bg-page);
+        }
+
+        .notif-icon-wrap.gray i {
+            color: var(--text-muted);
+            font-size: 16px;
+        }
+
+        .notif-body {
+            flex: 1;
+        }
+
+        .notif-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .notif-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .notif-time {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* ── CEK GIZI PAGE ── */
+        .gizi-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .gizi-menu-card,
+        .gizi-std-card {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 18px;
+        }
+
+        .gizi-menu-card h4,
+        .gizi-std-card h4 {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+        }
+
+        .menu-line {
+            font-size: 13px;
+            color: var(--text-primary);
+            padding: 3px 0;
+        }
+
+        .menu-line strong {
+            font-weight: 600;
+        }
+
+        .menu-date {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 10px;
+            border-top: 1px solid var(--border);
+            padding-top: 8px;
+        }
+
+        .std-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .std-row:last-child {
+            border-bottom: none;
+        }
+
+        .std-row span:first-child {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .std-row span:last-child {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--blue-primary);
+        }
+
+        .gizi-analysis-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .gizi-metric-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .gizi-metric {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 14px 16px;
+        }
+
+        .gizi-metric-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .gizi-metric-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .gizi-status-ok {
+            font-size: 11px;
+            font-weight: 600;
+            background: var(--success-light);
+            color: var(--success);
+            padding: 2px 7px;
+            border-radius: 4px;
+        }
+
+        .gizi-status-warn {
+            font-size: 11px;
+            font-weight: 600;
+            background: var(--warning-light);
+            color: var(--warning);
+            padding: 2px 7px;
+            border-radius: 4px;
+        }
+
+        .gizi-metric-val {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .gizi-metric-val.warn {
+            color: #E65100;
+        }
+
+        .gizi-metric-std {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .gizi-bar-track {
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .gizi-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            background: var(--success);
+        }
+
+        .gizi-bar-fill.warn {
+            background: #FF6D00;
+        }
+
+        .gizi-warning-hint {
+            background: var(--warning-light);
+            border: 1px solid #FFE082;
+            border-radius: var(--radius-sm);
+            padding: 6px 10px;
+            font-size: 11px;
+            color: var(--warning);
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .verdict-card {
+            background: var(--success-light);
+            border: 1px solid #A5D6A7;
+            border-radius: var(--radius-md);
+            padding: 14px 16px;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .verdict-card i {
+            font-size: 20px;
+            color: var(--success);
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .verdict-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: 2px;
+        }
+
+        .verdict-desc {
+            font-size: 12px;
+            color: #1B5E20;
+            line-height: 1.5;
+        }
+
+        /* ── PANDUAN PAGE ── */
+        .panduan-hero {
+            background: linear-gradient(135deg, #E3F2FD 0%, #E1F5EE 100%);
+            border: 1px solid #BBDEFB;
+            border-radius: var(--radius-lg);
+            padding: 20px 24px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .panduan-hero i {
+            font-size: 40px;
+            color: var(--blue-primary);
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .panduan-hero h2 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .panduan-hero p {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .panduan-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .panduan-step {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px 18px;
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .step-num {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--blue-primary);
+            color: #fff;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .step-body h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .step-body p {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .step-icon-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+
+        .step-icon-chip {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: var(--bg-page);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 4px 10px;
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .step-icon-chip i {
+            font-size: 12px;
+            color: var(--blue-primary);
+        }
+
+        /* ── TOAST ── */
+        #toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9998;
+            background: #1E1E2E;
+            color: #fff;
+            border-radius: var(--radius-md);
+            padding: 12px 18px;
+            font-size: 13px;
+            font-weight: 500;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            max-width: 340px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        #toast.show {
+            display: flex;
+        }
+
+        #toast i {
+            font-size: 16px;
+        }
+
+        #toast.success i {
+            color: #69F0AE;
+        }
+
+        #toast.error i {
+            color: #FF6B6B;
+        }
+
+        /* ── SCROLLBAR ── */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Offline Banner -->
+    <div id="offline-banner">
+        <i class="fas fa-wifi-slash"></i>
+        Tidak ada koneksi internet. Data tersimpan lokal.
+    </div>
+
+    <!-- Topbar -->
+    <header class="topbar"
+        style="background: var(--blue-primary); height: var(--header-h); display: flex; align-items: center; padding: 0 20px; gap: 12px; position: fixed; top: 0; left: 0; right: 0; z-index: 200;">
+        <div class="topbar-brand">
+            <div class="brand-icon"
+                style="background: rgba(255,255,255,0.2); width: 32px; height: 32px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                <img src="logo.png" alt="Logo" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+            <div>
+                <div class="brand-name"
+                    style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 15px; color: #fff; letter-spacing: -0.3px;">
+                    SWARASA PWA</div>
+                <div class="brand-sub" style="font-size: 10px; color: rgba(255,255,255,0.65); font-weight: 400;">
+                    Middleware Pengawasan Preventif</div>
+            </div>
+        </div>
+        <div class="topbar-location">
+            <div class="location-pill">
+                <i class="fas fa-location-dot"></i>
+                SDN 3 Denpasar Selatan · Bali
+            </div>
+        </div>
+        <div class="topbar-actions">
+            <button class="topbar-btn" onclick="navigate('notifikasi')" title="Notifikasi">
+                <i class="fas fa-bell"></i>
+                <span class="badge-notif">4</span>
+            </button>
+            <div class="avatar-btn" onclick="toggleProfile()">SR</div>
+        </div>
+    </header>
+
+    <!-- Profile Dropdown -->
+    <div class="dropdown" id="profile-dropdown">
+        <div class="dropdown-header">
+            <div class="dropdown-name">Siti Rahayu</div>
+            <div class="dropdown-role">P-00123 · Penerima Manfaat</div>
+        </div>
+        <a class="dropdown-item" href="#"><i class="fas fa-user"></i> Profil Saya</a>
+        <a class="dropdown-item" href="#"><i class="fas fa-gear"></i> Pengaturan Akun</a>
+        <a class="dropdown-item" href="#"><i class="fas fa-circle-question"></i> Bantuan</a>
+        <a class="dropdown-item text-danger" onclick="logout()"><i class="fas fa-arrow-right-from-bracket"></i> Keluar
+            (Logout)</a>
+    </div>
+
+    <!-- App Layout -->
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-section-label">Menu Utama</div>
+            <a class="nav-item" id="nav-beranda" onclick="navigate('beranda')">
+                <i class="fas fa-house"></i> Beranda
+            </a>
+            <a class="nav-item active" id="nav-laporan" onclick="navigate('laporan')">
+                <i class="fas fa-file-pen"></i> Buat Laporan
+            </a>
+            <a class="nav-item" id="nav-riwayat" onclick="navigate('riwayat')">
+                <i class="fas fa-clock-rotate-left"></i> Riwayat Laporan
+                <span class="nav-badge">2</span>
+            </a>
+            <a class="nav-item" id="nav-notifikasi" onclick="navigate('notifikasi')">
+                <i class="fas fa-bell"></i> Notifikasi
+                <span class="nav-badge warning">4</span>
+            </a>
+
+            <div class="sidebar-section-label">Informasi</div>
+            <a class="nav-item" id="nav-gizi" onclick="navigate('gizi')">
+                <i class="fas fa-bolt"></i> Cek Gizi Menu
+            </a>
+            <a class="nav-item" id="nav-panduan" onclick="navigate('panduan')">
+                <i class="fas fa-circle-info"></i> Panduan MBG
+            </a>
+
+            <div class="sidebar-bottom">
+                <div class="hotline-card">
+                    <p><i class="fas fa-phone"></i> Butuh Bantuan?</p>
+                    <p style="font-size:10px;color:var(--text-muted);margin-bottom:4px;">Hubungi hotline BGN:</p>
+                    <div class="hotline-num">0800-246-0246</div>
+                </div>
+                <div
+                    style="text-align: center; font-size: 10px; color: var(--text-muted); margin-top: 12px; font-weight: 500; letter-spacing: 0.5px;">
+                    by Tim Nomnom</div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+
+            <!-- BERANDA PAGE -->
+            <div id="page-beranda" class="page">
+                <!-- PWA Install Banner -->
+                <div id="pwa-install-banner"
+                    style="background: linear-gradient(95deg, var(--blue-primary), var(--teal)); border-radius: var(--radius-lg); padding: 14px 20px; display: none; align-items: center; justify-content: space-between; margin-bottom: 20px; box-shadow: var(--shadow-md); position: relative; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.15);">
+                    <div style="display: flex; align-items: center; gap: 14px; z-index: 1;">
+                        <div
+                            style="width: 36px; height: 36px; background: rgba(255,255,255,0.2); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px;">
+                            <i class="fas fa-download"></i>
+                        </div>
+                        <div>
+                            <strong style="color: white; font-size: 13.5px; display: block;">Akses Cepat Via Home Screen
+                                (PWA)</strong>
+                            <span style="color: rgba(255,255,255,0.8); font-size: 11.5px;">Kirim laporan dan cek gizi
+                                menu lebih cepat tanpa install aplikasi dari store.</span>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px; z-index: 1;">
+                        <button class="btn-small"
+                            style="background: white; border: none; color: var(--teal-dark); font-weight: 700; font-size: 11.5px; padding: 6px 14px; border-radius: 6px;"
+                            onclick="installPWA()">Install Sekarang</button>
+                        <button
+                            style="background: none; border: none; color: rgba(255,255,255,0.6); cursor: pointer; padding: 6px;"
+                            onclick="dismissPWABanner()"><i class="fas fa-xmark"></i></button>
+                    </div>
+                </div>
+
+                <div class="hero-banner">
+                    <div class="hero-text">
+                        <h2>Selamat Pagi, Siti Rahayu!</h2>
+                        <p>Pantau kualitas program MBG di SDN 3 Denpasar Selatan</p>
+                    </div>
+                    <div class="hero-stats">
+                        <div class="hero-stat"><span class="val">12</span><span class="lbl">Laporan Saya</span></div>
+                        <div class="hero-stat"><span class="val">4,2</span><span class="lbl">Avg. Rating</span></div>
+                        <div class="hero-stat"><span class="val">92%</span><span class="lbl">Terselesaikan</span></div>
+                    </div>
+                </div>
+
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-icon blue"><i class="fas fa-file-lines"></i></div>
+                        <div>
+                            <div class="kpi-val">12</div>
+                            <div class="kpi-lbl">Total Laporan</div>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon green"><i class="fas fa-circle-check"></i></div>
+                        <div>
+                            <div class="kpi-val">11</div>
+                            <div class="kpi-lbl">Terselesaikan</div>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon orange"><i class="fas fa-triangle-exclamation"></i></div>
+                        <div>
+                            <div class="kpi-val" style="color:#E65100">1</div>
+                            <div class="kpi-lbl">Dalam Proses</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-title"><i class="fas fa-radar"></i> Status Laporan Terkini</div>
+                <div class="tracker-card">
+                    <div style="display:flex;align-items:flex-start;justify-content:space-between">
+                        <div>
+                            <div class="tracker-id">RPT-2026-06-0892</div>
+                            <div class="tracker-title">Makanan basi &amp; tidak segar</div>
+                            <div class="tracker-meta">Dilaporkan: 18 Jul 2025 · 09:14 · Kategori: Keamanan Pangan &amp;
+                                Kesehatan</div>
+                        </div>
+                        <div class="tracker-status-badge"><i class="fas fa-circle-notch fa-spin"></i> Sedang Diproses
+                        </div>
+                    </div>
+                    <div class="tracker-steps">
+                        <div class="tracker-step">
+                            <div class="step-circle done"><i class="fas fa-check" style="font-size:12px"></i></div>
+                            <div class="step-label">Diterima</div>
+                        </div>
+                        <div class="step-connector done"></div>
+                        <div class="tracker-step">
+                            <div class="step-circle done"><i class="fas fa-check" style="font-size:12px"></i></div>
+                            <div class="step-label">Diverifikasi</div>
+                        </div>
+                        <div class="step-connector done"></div>
+                        <div class="tracker-step">
+                            <div class="step-circle active"><i class="fas fa-bolt" style="font-size:12px"></i></div>
+                            <div class="step-label active-lbl">Investigasi</div>
+                        </div>
+                        <div class="step-connector"></div>
+                        <div class="tracker-step">
+                            <div class="step-circle pending">4</div>
+                            <div class="step-label">Tindakan</div>
+                        </div>
+                        <div class="step-connector"></div>
+                        <div class="tracker-step">
+                            <div class="step-circle pending">5</div>
+                            <div class="step-label">Selesai</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-title"><i class="fas fa-circle-info"></i> Info Program MBG Hari Ini</div>
+                <div class="info-grid">
+                    <div class="info-card">
+                        <div class="info-card-header">
+                            <div class="info-card-icon"><i class="fas fa-utensils"></i></div>
+                            <div>
+                                <div class="info-card-title">Menu Hari Ini</div>
+                                <div class="info-card-sub">Kamis, 4 Juni 2026</div>
+                            </div>
+                        </div>
+                        <div class="menu-items">
+                            <div class="menu-item"><i class="fas fa-circle-dot"
+                                    style="font-size:10px; color:var(--teal); margin-right:6px"></i> Nasi Putih</div>
+                            <div class="menu-item"><i class="fas fa-circle-dot"
+                                    style="font-size:10px; color:var(--teal); margin-right:6px"></i> Ayam Goreng</div>
+                            <div class="menu-item"><i class="fas fa-circle-dot"
+                                    style="font-size:10px; color:var(--teal); margin-right:6px"></i> Tempe Goreng</div>
+                            <div class="menu-item"><i class="fas fa-circle-dot"
+                                    style="font-size:10px; color:var(--teal); margin-right:6px"></i> Tumis Kangkung
+                            </div>
+                            <div class="menu-item"><i class="fas fa-circle-dot"
+                                    style="font-size:10px; color:var(--teal); margin-right:6px"></i> Buah Pisang</div>
+                        </div>
+                        <div class="menu-warning"
+                            style="background: var(--success-light); color: var(--success); border-color: rgb(165, 214, 167);">
+                            <i class="fas fa-circle-check"></i> Kalori: 620 kkal · Standar Min 550 kkal (Sesuai)
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-card-header">
+                            <div class="info-card-icon orange"><i class="fas fa-store"></i></div>
+                            <div>
+                                <div class="info-card-title">Info Vendor</div>
+                                <div class="info-card-sub">SPPG-BA-0003</div>
+                            </div>
+                        </div>
+                        <div class="vendor-info">
+                            <div class="vendor-name">UD Gizi Prima Bali</div>
+                            <div class="vendor-score" style="background: var(--success-light); color: var(--success);">
+                                <i class="fas fa-shield-halved" style="font-size:10px"></i> Aman · Skor 88/100
+                            </div>
+                            <div class="vendor-rating"><i class="fas fa-star" style="color:#F9A825;font-size:11px"></i>
+                                Rating kepuasan: 4,4/5</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="page-footer">
+                    <span><i class="fas fa-microchip"></i> Klasifikasi Laporan</span>
+                    <span><i class="fas fa-microchip"></i> Analisis Sentimen</span>
+                    <span><i class="fas fa-microchip"></i> Rekomendasi Gizi Otomatis &amp; Akurat Berbasis Data</span>
+                </div>
+            </div>
+
+            <!-- LAPORAN PAGE -->
+            <div id="page-laporan" class="page active">
+                <div class="page-header">
+                    <div class="page-title">Buat Laporan Baru</div>
+                    <div class="page-sub">Laporkan kualitas makanan MBG yang Anda terima hari ini</div>
+                </div>
+                <div class="ai-badge"><i class="fas fa-bolt"></i> AI-Powered Analysis</div>
+
+                <div class="form-card">
+                    <div class="form-card-header">
+                        <div class="form-card-title">Form Laporan MBG</div>
+                        <div class="form-card-sub">SDN 3 Denpasar Selatan · Jum'at, 18 Juli 2025</div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group" style="margin:0">
+                            <label class="form-label">Nama Lengkap</label>
+                            <input class="form-input" type="text" value="Siti Rahayu" placeholder="Nama lengkap"
+                                id="reporter-name">
+                        </div>
+                        <div class="form-group" style="margin:0">
+                            <label class="form-label">Hubungan dengan Siswa / Peran</label>
+                            <select class="form-select" id="reporter-role" style="height: 42px;">
+                                <option value="Orang Tua" selected="">Orang Tua Murid</option>
+                                <option value="Guru">Guru / Staf Sekolah</option>
+                                <option value="Pengawas">Pengawas Sekolah</option>
+                                <option value="Siswa">Siswa / Penerima Manfaat</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Nomor Telepon</label>
+                        <input class="form-input" type="tel" value="0812-3456-7890" placeholder="08xx-xxxx-xxxx"
+                            id="reporter-phone">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Rating Kepuasan Hari Ini</label>
+                        <div class="star-rating" id="star-rating">
+                            <button class="star-btn filled" data-val="1" onclick="setRating(1)">★</button>
+                            <button class="star-btn filled" data-val="2" onclick="setRating(2)">★</button>
+                            <button class="star-btn filled" data-val="3" onclick="setRating(3)">★</button>
+                            <button class="star-btn" data-val="4" onclick="setRating(4)">★</button>
+                            <button class="star-btn" data-val="5" onclick="setRating(5)">★</button>
+                            <span class="star-hint" id="star-hint">Anda memberi rating 3/5 bintang</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Pilih Masalah yang Ditemukan</label>
+                        <div class="problem-chips" id="problem-chips">
+                            <div class="problem-chip" onclick="toggleChip(this)"><i class="fas fa-ban"
+                                    style="font-size:10px;margin-right:4px"></i> Makanan Basi</div>
+                            <div class="problem-chip" onclick="toggleChip(this)">Bau Menyengat</div>
+                            <div class="problem-chip" onclick="toggleChip(this)">Porsi Kurang</div>
+                            <div class="problem-chip" onclick="toggleChip(this)">Terlambat &gt;2 Jam</div>
+                            <div class="problem-chip" onclick="toggleChip(this)">Rambut / Serangga</div>
+                            <div class="problem-chip" onclick="toggleChip(this)">Kemasan Rusak</div>
+                            <div class="problem-chip" onclick="toggleChip(this)">Kualitas Rendah</div>
+                            <div class="problem-chip" onclick="toggleChip(this)">Tidak Sesuai Menu</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Ceritakan Pengalaman Anda</label>
+                        <textarea class="form-textarea" placeholder="Apa yang terjadi? Jelaskan sedetail mungkin..."
+                            id="desc-field" oninput="countChars(this)"></textarea>
+                        <div style="text-align:right;font-size:11px;color:var(--text-muted);margin-top:4px"><span
+                                id="char-count">0</span>/200 karakter</div>
+                    </div>
+
+                    <!-- Swarasa Real-time AI NLP Analysis Panel -->
+                    <div id="nlp-panel"
+                        style="background: rgba(21, 101, 192, 0.05); border: 1.5px dashed rgba(21, 101, 192, 0.3); border-radius: var(--radius-md); padding: 16px; margin-bottom: 16px; display: none;">
+                        <div
+                            style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                            <div
+                                style="font-weight: 700; font-size: 12px; color: var(--blue-primary); text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
+                                <i class="fas fa-robot fa-spin" style="color: var(--teal);"></i> Swarasa NLP Engine
+                                (IndoBERT Simulation)
+                            </div>
+                            <span
+                                style="font-size: 11px; font-weight: 600; background: var(--blue-light); color: var(--blue-primary); padding: 2px 8px; border-radius: 4px;">Analisis
+                                Real-time</span>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 12px;">
+                            <div>
+                                <span style="color: var(--text-secondary); display: block; margin-bottom: 2px;">Kategori
+                                    Keluhan:</span>
+                                <strong id="nlp-category"
+                                    style="color: var(--text-primary); font-size: 13px;">-</strong>
+                            </div>
+                            <div>
+                                <span style="color: var(--text-secondary); display: block; margin-bottom: 2px;">Tingkat
+                                    Urgensi:</span>
+                                <strong id="nlp-urgency" style="color: var(--text-primary); font-size: 13px;">-</strong>
+                            </div>
+                            <div>
+                                <span style="color: var(--text-secondary); display: block; margin-bottom: 2px;">Skor
+                                    Kepercayaan AI:</span>
+                                <strong id="nlp-confidence"
+                                    style="color: var(--text-primary); font-size: 13px;">-</strong>
+                            </div>
+                            <div>
+                                <span style="color: var(--text-secondary); display: block; margin-bottom: 2px;">Sentimen
+                                    Laporan:</span>
+                                <strong id="nlp-sentiment"
+                                    style="color: var(--text-primary); font-size: 13px;">-</strong>
+                            </div>
+                        </div>
+                        <div
+                            style="margin-top: 10px; font-size: 11px; color: var(--text-secondary); line-height: 1.4; border-top: 1px solid var(--border); padding-top: 8px; display: flex; gap: 6px; align-items: flex-start;">
+                            <i class="fas fa-shield-halved" style="color: var(--teal); margin-top: 2px;"></i>
+                            <span>Model secara otomatis memetakan laporan untuk mempercepat eskalasi pencegahan
+                                keracunan dan keterlambatan SPPG.</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Foto Bukti <span
+                                style="font-weight:400;text-transform:none;letter-spacing:0">(Sangat
+                                Dianjurkan)</span></label>
+                        <div class="photo-zone" onclick="showToast('Kamera dibuka...','info')">
+                            <i class="fas fa-image"></i>
+                            <p>Klik atau drag foto di sini</p>
+                            <small>Mendukung JPG, PNG (Max 5MB per foto)</small>
+                            <div class="photo-hint"><i class="fas fa-bolt" style="font-size:9px"></i> Foto membantu
+                                proses verifikasi 3× lebih cepat</div>
+                        </div>
+                    </div>
+
+                    <button class="submit-btn" onclick="submitReport()">
+                        <i class="fas fa-paper-plane"></i> Kirim Laporan Saya
+                    </button>
+                </div>
+
+                <div class="page-footer" style="margin-top:16px">
+                    <span><i class="fas fa-microchip"></i> Klasifikasi Laporan</span>
+                    <span><i class="fas fa-microchip"></i> Analisis Sentimen</span>
+                    <span><i class="fas fa-microchip"></i> Rekomendasi Gizi Otomatis &amp; Akurat Berbasis Data</span>
+                </div>
+            </div>
+
+            <!-- RIWAYAT PAGE -->
+            <div id="page-riwayat" class="page">
+                <div class="page-header">
+                    <div class="page-title">Riwayat Laporan</div>
+                    <div class="page-sub">12 laporan yang pernah Anda kirimkan</div>
+                </div>
+                <div class="ai-badge"><i class="fas fa-bolt"></i> AI Classification</div>
+
+                <div class="stats-mini">
+                    <div class="stat-mini-card"><span class="stat-mini-val blue">12</span><span
+                            class="stat-mini-lbl">Total Laporan</span></div>
+                    <div class="stat-mini-card"><span class="stat-mini-val orange">1</span><span
+                            class="stat-mini-lbl">Diproses</span></div>
+                    <div class="stat-mini-card"><span class="stat-mini-val green">11</span><span
+                            class="stat-mini-lbl">Selesai</span></div>
+                </div>
+
+                <div class="filter-tabs">
+                    <div class="filter-tab active" onclick="filterReports(this,'semua')">Semua</div>
+                    <div class="filter-tab" onclick="filterReports(this,'diproses')">Diproses (1)</div>
+                    <div class="filter-tab" onclick="filterReports(this,'selesai')">Selesai (11)</div>
+                </div>
+
+                <div class="report-list">
+                    <div class="report-card" data-status="diproses">
+                        <div class="report-card-header">
+                            <div style="display:flex;align-items:flex-start;gap:10px;flex:1">
+                                <div class="report-card-icon negative"><i class="fas fa-circle-exclamation"></i></div>
+                                <div>
+                                    <div class="report-card-title"
+                                        style="font-weight: 700; color: var(--text-primary);">Makanan basi &amp; tidak
+                                        segar</div>
+                                    <div class="report-card-id">RPT-2026-06-0892</div>
+                                    <div style="display:flex;gap:8px;margin-top:6px;align-items:center;flex-wrap:wrap">
+                                        <span style="font-size:11px;color:var(--text-muted)">18 Jul 2025 · 09:14</span>
+                                        <span class="sentiment-badge neg"><i class="fas fa-bolt"
+                                                style="font-size:9px"></i> High Negative</span>
+                                        <span style="font-size:11px;color:#f59e0b;font-weight:700">★☆☆☆☆</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+                                <span class="status-pill diproses">DIPROSES</span>
+                                <div class="confidence-bar">
+                                    <span style="font-size:11px;font-weight:600;color:var(--blue-primary)">96% AI</span>
+                                    <div class="confidence-track">
+                                        <div class="confidence-fill" style="width:96%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="report-body"
+                            style="font-size:13.5px; margin: 10px 0; color: var(--text-secondary);">Makanan tiba sudah
+                            basi dan berbau tidak sedap. Anak-anak menolak makan.</div>
+                        <div class="report-tags" style="display:flex; gap:6px;">
+                            <span class="report-tag blue">Keamanan Pangan &amp; Kesehatan</span>
+                            <span class="report-tag"
+                                style="background:var(--bg-page);color:var(--text-secondary)">Urgensi: Kritis</span>
+                        </div>
+                        <div class="report-actions" style="margin-top: 12px; display: flex; gap: 8px;">
+                            <a class="btn-small outline-blue" onclick="showReportDetail('RPT-2026-06-0892')"><i
+                                    class="fas fa-eye" style="font-size:11px"></i> Detail</a>
+                            <a class="btn-small outline-teal" onclick="editReport('RPT-2026-06-0892')"><i
+                                    class="fas fa-pen" style="font-size:11px"></i> Edit</a>
+                            <a class="btn-small"
+                                style="border-color:#ffcdd2; color:#d32f2f; background:#fff5f5; display: inline-flex; align-items: center;"
+                                onclick="deleteReport('RPT-2026-06-0892')"><i class="fas fa-trash"
+                                    style="font-size:11px"></i> Hapus</a>
+                        </div>
+                    </div>
+                    <div class="report-card" data-status="selesai">
+                        <div class="report-card-header">
+                            <div style="display:flex;align-items:flex-start;gap:10px;flex:1">
+                                <div class="report-card-icon positive"><i class="fas fa-circle-check"></i></div>
+                                <div>
+                                    <div class="report-card-title"
+                                        style="font-weight: 700; color: var(--text-primary);">Menu hari ini sangat enak!
+                                    </div>
+                                    <div class="report-card-id">RPT-2026-06-0841</div>
+                                    <div style="display:flex;gap:8px;margin-top:6px;align-items:center;flex-wrap:wrap">
+                                        <span style="font-size:11px;color:var(--text-muted)">15 Jul 2025 · 11:30</span>
+                                        <span class="sentiment-badge pos"><i class="fas fa-bolt"
+                                                style="font-size:9px"></i> High Positive</span>
+                                        <span style="font-size:11px;color:#f59e0b;font-weight:700">★★★★★</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+                                <span class="status-pill selesai">SELESAI</span>
+                                <div class="confidence-bar">
+                                    <span style="font-size:11px;font-weight:600;color:var(--blue-primary)">93% AI</span>
+                                    <div class="confidence-track">
+                                        <div class="confidence-fill" style="width:93%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="report-body"
+                            style="font-size:13.5px; margin: 10px 0; color: var(--text-secondary);">Makanan hari ini
+                            sangat enak dan bergizi. Anak-anak sangat senang dan lahap makan.</div>
+                        <div class="report-tags" style="display:flex; gap:6px;">
+                            <span class="report-tag blue">Pujian &amp; Saran</span>
+                            <span class="report-tag"
+                                style="background:var(--bg-page);color:var(--text-secondary)">Urgensi: Rendah</span>
+                        </div>
+                        <div class="report-actions" style="margin-top: 12px; display: flex; gap: 8px;">
+                            <a class="btn-small outline-blue" onclick="showReportDetail('RPT-2026-06-0841')"><i
+                                    class="fas fa-eye" style="font-size:11px"></i> Detail</a>
+                            <a class="btn-small outline-teal" onclick="editReport('RPT-2026-06-0841')"><i
+                                    class="fas fa-pen" style="font-size:11px"></i> Edit</a>
+                            <a class="btn-small"
+                                style="border-color:#ffcdd2; color:#d32f2f; background:#fff5f5; display: inline-flex; align-items: center;"
+                                onclick="deleteReport('RPT-2026-06-0841')"><i class="fas fa-trash"
+                                    style="font-size:11px"></i> Hapus</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="page-footer" style="margin-top:16px">
+                    <span><i class="fas fa-microchip"></i> Klasifikasi Laporan</span>
+                    <span><i class="fas fa-microchip"></i> Analisis Sentimen</span>
+                    <span><i class="fas fa-microchip"></i> Rekomendasi Gizi Otomatis &amp; Akurat Berbasis Data</span>
+                </div>
+            </div>
+
+            <!-- NOTIFIKASI PAGE -->
+            <div id="page-notifikasi" class="page">
+                <div class="notif-header-row">
+                    <div>
+                        <div class="page-title">Notifikasi</div>
+                        <div class="page-sub">4 notifikasi belum dibaca</div>
+                    </div>
+                    <button class="mark-all-btn" onclick="markAllRead()"><i class="fas fa-check-double"
+                            style="font-size:11px"></i> Tandai Semua Dibaca</button>
+                </div>
+
+                <div class="notif-card">
+                    <div class="notif-item unread" id="notif-1">
+                        <div class="notif-unread-dot" id="dot-1"></div>
+                        <div class="notif-icon-wrap orange"><i class="fas fa-circle-exclamation"></i></div>
+                        <div class="notif-body">
+                            <div class="notif-title">Laporan RPT-0892 sedang diinvestigasi</div>
+                            <div class="notif-desc">Tim BGN telah menghubungi vendor terkait laporan kualitas makanan
+                                Anda. Proses investigasi berlangsung 1–3 hari.</div>
+                            <div class="notif-time"><i class="fas fa-clock" style="font-size:9px"></i> 2 jam yang lalu
+                            </div>
+                        </div>
+                    </div>
+                    <div class="notif-item unread" id="notif-2">
+                        <div class="notif-unread-dot" id="dot-2"></div>
+                        <div class="notif-icon-wrap teal"><i class="fas fa-bolt"></i></div>
+                        <div class="notif-body">
+                            <div class="notif-title">Analisis Gizi Menu Hari Ini Siap</div>
+                            <div class="notif-desc">AI SWARASA telah menganalisis menu hari ini. Kalori: 487 kkal —
+                                perlu peningkatan protein.</div>
+                            <div class="notif-time"><i class="fas fa-clock" style="font-size:9px"></i> 6 jam yang lalu
+                            </div>
+                        </div>
+                    </div>
+                    <div class="notif-item unread" id="notif-3">
+                        <div class="notif-unread-dot" id="dot-3"></div>
+                        <div class="notif-icon-wrap green"><i class="fas fa-circle-check"></i></div>
+                        <div class="notif-body">
+                            <div class="notif-title">Laporan RPT-0841 telah diselesaikan</div>
+                            <div class="notif-desc">Laporan "Menu hari ini sangat enak!" telah diarsipkan sebagai
+                                feedback positif untuk vendor.</div>
+                            <div class="notif-time"><i class="fas fa-clock" style="font-size:9px"></i> Kemarin · 16:30
+                            </div>
+                        </div>
+                    </div>
+                    <div class="notif-item unread" id="notif-4">
+                        <div class="notif-unread-dot" id="dot-4"></div>
+                        <div class="notif-icon-wrap blue"><i class="fas fa-clipboard-list"></i></div>
+                        <div class="notif-body">
+                            <div class="notif-title">Pengingat: Buat Laporan Hari Ini</div>
+                            <div class="notif-desc">Anda belum membuat laporan untuk hari Jum'at ini. Laporan Anda
+                                sangat berarti untuk program MBG.</div>
+                            <div class="notif-time"><i class="fas fa-clock" style="font-size:9px"></i> Kemarin · 12:00
+                            </div>
+                        </div>
+                    </div>
+                    <div class="notif-item" id="notif-5">
+                        <div class="notif-icon-wrap gray"><i class="fas fa-shield-check"></i></div>
+                        <div class="notif-body">
+                            <div class="notif-title">Vendor berhasil diverifikasi ulang</div>
+                            <div class="notif-desc">UD Gizi Prima Bali telah melewati evaluasi rutin dengan skor 88/100.
+                                Status: Aman.</div>
+                            <div class="notif-time"><i class="fas fa-clock" style="font-size:9px"></i> 3 hari lalu</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CEK GIZI PAGE -->
+            <div id="page-gizi" class="page">
+                <div class="page-header">
+                    <div class="page-title">Cek Gizi Menu</div>
+                    <div class="page-sub">Analisis nutrisi menu harian dengan standar gizi nasional</div>
+                </div>
+
+                <!-- Swarasa PWA Allergy Gate Registry -->
+                <div
+                    style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 18px; margin-bottom: 20px;">
+                    <div
+                        style="font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-shield-virus" style="color: var(--danger); font-size: 16px;"></i>
+                        Swarasa Menu Safety Gate — Profil Kondisi Khusus Anak
+                    </div>
+                    <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.4;">
+                        Aktifkan status alergi, intoleransi, atau fobia makanan anak Anda untuk memvalidasi menu harian
+                        secara otomatis. Sistem secara preventif memadankan input bahan dari vendor melalui <strong>AI
+                            Fuzzy Matching</strong> dengan database medis alergen BGN.
+                    </p>
+
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 8px;">
+                        <div>
+                            <div
+                                style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px;">
+                                <i class="fas fa-circle-exclamation" style="color: var(--danger); margin-right:4px"></i>
+                                Alergi
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <label
+                                    style="display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; cursor: pointer;">
+                                    <input type="checkbox" id="allergy-peanut" onchange="checkAllergyGate()"
+                                        style="width: 16px; height: 16px; accent-color: var(--danger);"> Alergi Kacang
+                                </label>
+                                <label
+                                    style="display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; cursor: pointer;">
+                                    <input type="checkbox" id="allergy-seafood" onchange="checkAllergyGate()"
+                                        style="width: 16px; height: 16px; accent-color: var(--danger);"> Alergi Seafood
+                                </label>
+                                <label
+                                    style="display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; cursor: pointer;">
+                                    <input type="checkbox" id="allergy-egg" onchange="checkAllergyGate()"
+                                        style="width: 16px; height: 16px; accent-color: var(--danger);"> Alergi Telur
+                                </label>
+                                <label
+                                    style="display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; cursor: pointer;">
+                                    <input type="checkbox" id="allergy-milk" onchange="checkAllergyGate()"
+                                        style="width: 16px; height: 16px; accent-color: var(--danger);"> Alergi Susu
+                                    Sapi
+                                </label>
+                            </div>
+                        </div>
+                        <div>
+                            <div
+                                style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px;">
+                                <i class="fas fa-triangle-exclamation"
+                                    style="color: var(--warning); margin-right:4px"></i> Intoleransi
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <label
+                                    style="display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; cursor: pointer;">
+                                    <input type="checkbox" id="intolerance-lactose" onchange="checkAllergyGate()"
+                                        style="width: 16px; height: 16px; accent-color: var(--warning);"> Intoleransi
+                                    Laktosa
+                                </label>
+                                <label
+                                    style="display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; cursor: pointer;">
+                                    <input type="checkbox" id="intolerance-gluten" onchange="checkAllergyGate()"
+                                        style="width: 16px; height: 16px; accent-color: var(--warning);"> Intoleransi
+                                    Gluten
+                                </label>
+                            </div>
+                        </div>
+                        <div>
+                            <div
+                                style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px;">
+                                <i class="fas fa-face-frown" style="color: var(--blue-primary); margin-right:4px"></i>
+                                Fobia Makanan
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <label
+                                    style="display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; cursor: pointer;">
+                                    <input type="checkbox" id="phobia-fish" onchange="checkAllergyGate()"
+                                        style="width: 16px; height: 16px; accent-color: var(--blue-primary);"> Fobia
+                                    Ikan
+                                </label>
+                                <label
+                                    style="display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; cursor: pointer;">
+                                    <input type="checkbox" id="phobia-onion" onchange="checkAllergyGate()"
+                                        style="width: 16px; height: 16px; accent-color: var(--blue-primary);"> Fobia
+                                    Bawang
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Allergy Alert Banner -->
+                    <div id="allergy-gate-banner"
+                        style="display: none; margin-top: 14px; background: #fff2f2; border: 1.5px solid #ffcdd2; border-radius: var(--radius-sm); padding: 12px; font-size: 12px; color: #d32f2f; align-items: flex-start; gap: 8px;">
+                        <i class="fas fa-circle-xmark" style="font-size: 16px; margin-top: 2px;"></i>
+                        <div>
+                            <strong style="display: block; margin-bottom: 2px;">AI Safety Gate: BAHAN BERBAHAYA / RISIKO
+                                TERDETEKSI!</strong>
+                            <span id="allergy-gate-msg"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="gizi-grid">
+                    <div class="gizi-menu-card">
+                        <h4><i class="fas fa-utensils" style="color:var(--teal);margin-right:6px"></i> Menu Hari Ini
+                        </h4>
+                        <div class="menu-line" style="padding: 4px 0; border-bottom: 1px solid var(--border);"><i
+                                class="fas fa-circle-dot"
+                                style="font-size:8px;color:var(--teal);margin-right:6px"></i><strong>Nasi Putih</strong>
+                        </div>
+                        <div class="menu-line" style="padding: 4px 0; border-bottom: 1px solid var(--border);"><i
+                                class="fas fa-circle-dot"
+                                style="font-size:8px;color:var(--teal);margin-right:6px"></i><strong>Ayam
+                                Goreng</strong></div>
+                        <div class="menu-line" style="padding: 4px 0; border-bottom: 1px solid var(--border);"><i
+                                class="fas fa-circle-dot"
+                                style="font-size:8px;color:var(--teal);margin-right:6px"></i><strong>Tempe
+                                Goreng</strong></div>
+                        <div class="menu-line" style="padding: 4px 0; border-bottom: 1px solid var(--border);"><i
+                                class="fas fa-circle-dot"
+                                style="font-size:8px;color:var(--teal);margin-right:6px"></i><strong>Tumis
+                                Kangkung</strong></div>
+                        <div class="menu-line" style="padding: 4px 0; border-bottom: 1px solid var(--border);"><i
+                                class="fas fa-circle-dot"
+                                style="font-size:8px;color:var(--teal);margin-right:6px"></i><strong>Buah
+                                Pisang</strong></div>
+                        <div class="menu-date"
+                            style="margin-top:10px; border-top:1px solid var(--border); padding-top:8px;"><i
+                                class="fas fa-calendar-days" style="font-size:10px"></i> Kamis, 4 Juni 2026</div>
+                    </div>
+                    <div class="gizi-std-card">
+                        <h4><i class="fas fa-chart-bar" style="color:var(--blue-primary);margin-right:6px"></i> Standar
+                            Gizi</h4>
+                        <div class="std-row"><span>Kalori</span><span>550 kcal</span></div>
+                        <div class="std-row"><span>Protein</span><span>12 g</span></div>
+                        <div class="std-row"><span>Lemak</span><span>18 g</span></div>
+                        <div class="std-row"><span>Karbohidrat</span><span>80 g</span></div>
+                    </div>
+                </div>
+
+                <div id="gizi-analysis-container">
+                    <div class="gizi-analysis-title">Hasil Analisis Gizi</div>
+                    <div class="gizi-metric-grid">
+                        <div class="gizi-metric">
+                            <div class="gizi-metric-header">
+                                <span class="gizi-metric-name">Kalori</span>
+                                <span class="gizi-status-ok">✓ Baik</span>
+                            </div>
+                            <div class="gizi-metric-val ">620 kcal</div>
+                            <div class="gizi-metric-std">Standar: 550 kcal (Sesuai)</div>
+                            <div class="gizi-bar-track">
+                                <div class="gizi-bar-fill " style="width:100%"></div>
+                            </div>
+
+                        </div>
+
+                        <div class="gizi-metric">
+                            <div class="gizi-metric-header">
+                                <span class="gizi-metric-name">Protein</span>
+                                <span class="gizi-status-ok">✓ Baik</span>
+                            </div>
+                            <div class="gizi-metric-val ">31 g</div>
+                            <div class="gizi-metric-std">Standar: 12 g (Sesuai)</div>
+                            <div class="gizi-bar-track">
+                                <div class="gizi-bar-fill " style="width:100%"></div>
+                            </div>
+
+                        </div>
+
+                        <div class="gizi-metric">
+                            <div class="gizi-metric-header">
+                                <span class="gizi-metric-name">Lemak</span>
+                                <span class="gizi-status-ok">✓ Baik</span>
+                            </div>
+                            <div class="gizi-metric-val ">25.7 g</div>
+                            <div class="gizi-metric-std">Standar: 18 g (Sesuai)</div>
+                            <div class="gizi-bar-track">
+                                <div class="gizi-bar-fill " style="width:100%"></div>
+                            </div>
+                        </div>
+
+                        <div class="gizi-metric">
+                            <div class="gizi-metric-header">
+                                <span class="gizi-metric-name">Karbohidrat</span>
+                                <span class="gizi-status-warn">⚠ Dibawah</span>
+                            </div>
+                            <div class="gizi-metric-val warn">66 g</div>
+                            <div class="gizi-metric-std">Standar: 80 g (14 g kurang)</div>
+                            <div class="gizi-bar-track">
+                                <div class="gizi-bar-fill warn" style="width:83%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-title">Panduan Kelayakan Gizi</div>
+                    <div class="verdict-card" style="background:#fffde7; border:1px solid #ffe082;">
+                        <i class="fas fa-triangle-exclamation" style="color:#f57f17;"></i>
+                        <div>
+                            <div class="verdict-title" style="color:#f57f17;">Kelayakan: CUKUP BAIK</div>
+                            <div class="verdict-desc" style="color:#e65100;">Menu memenuhi 3 dari 4 kriteria gizi.
+                                Kualitas menu secara keseluruhan layak diberikan, namun disarankan menambahkan porsi
+                                atau lauk pendukung.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="page-footer" style="margin-top:16px">
+                    <span>Standar Gizi Nasional</span>
+                    <span>|</span>
+                    <span>Dirjen PKG Kemendikbudristek 2024</span>
+                    <span>|</span>
+                    <span>Data dari Database Menu MBG Terpusat</span>
+                </div>
+            </div>
+
+            <!-- PANDUAN PAGE -->
+            <div id="page-panduan" class="page">
+                <div class="page-header">
+                    <div class="page-title">Panduan MBG</div>
+                    <div class="page-sub">Pelajari cara menggunakan program Makan Bergizi Gratis</div>
+                </div>
+
+                <div class="panduan-hero">
+                    <i class="fas fa-star"></i>
+                    <h2>Panduan Program MBG</h2>
+                    <p>Ikuti panduan lengkap untuk memaksimalkan manfaat program Makan Bergizi Gratis bagi siswa</p>
+                </div>
+
+                <div class="panduan-steps">
+                    <div class="panduan-step">
+                        <div class="step-num">1</div>
+                        <div class="step-body">
+                            <h4>Terima Makanan dari Vendor</h4>
+                            <p>Makanan MBG akan tiba setiap hari sekolah. Periksa kualitas, kebersihan kemasan, dan
+                                kelengkapan porsi saat menerima.</p>
+                            <div class="step-icon-row">
+                                <div class="step-icon-chip"><i class="fas fa-calendar-check"></i> Setiap hari sekolah
+                                </div>
+                                <div class="step-icon-chip"><i class="fas fa-clock"></i> Estimasi jam 10.00–12.00</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panduan-step">
+                        <div class="step-num">2</div>
+                        <div class="step-body">
+                            <h4>Rating &amp; Lapor Kualitas</h4>
+                            <p>Beri bintang dan laporkan kondisi makanan. Laporan Anda membantu meningkatkan kualitas
+                                program secara nasional.</p>
+                            <div class="step-icon-row">
+                                <div class="step-icon-chip"><i class="fas fa-star"></i> Beri rating 1–5</div>
+                                <div class="step-icon-chip"><i class="fas fa-camera"></i> Foto bukti</div>
+                                <div class="step-icon-chip"><i class="fas fa-bolt"></i> Analisis AI otomatis</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panduan-step">
+                        <div class="step-num">3</div>
+                        <div class="step-body">
+                            <h4>Pantau Status &amp; Tindak Lanjut</h4>
+                            <p>Setiap laporan diproses oleh SPPG dan BGN Pusat. Anda bisa memantau status dari halaman
+                                Beranda kapan saja.</p>
+                            <div class="step-icon-row">
+                                <div class="step-icon-chip"><i class="fas fa-radar"></i> Tracker real-time</div>
+                                <div class="step-icon-chip"><i class="fas fa-bell"></i> Notifikasi otomatis</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panduan-step">
+                        <div class="step-num">4</div>
+                        <div class="step-body">
+                            <h4>Cek Kandungan Gizi Harian</h4>
+                            <p>Gunakan fitur Cek Gizi Menu untuk melihat apakah makanan hari ini memenuhi standar gizi
+                                nasional untuk usia SD.</p>
+                            <div class="step-icon-row">
+                                <div class="step-icon-chip"><i class="fas fa-chart-bar"></i> Analisis nutrisi</div>
+                                <div class="step-icon-chip"><i class="fas fa-shield-check"></i> Standar BGN</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="page-footer">
+                    <span><i class="fas fa-shield-heart"></i> Privasi Anda terlindungi</span>
+                    <span>Laporan bersifat rahasia dan tidak memengaruhi hak bantuan atau nilai sekolah</span>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast">
+        <i class="fas fa-circle-check" id="toast-icon"></i>
+        <span id="toast-msg">Berhasil!</span>
+    </div>
+
+    <script>
+        let currentPage = 'beranda';
+        let currentRating = 3;
+
+        // ── DB INIT ──
+        // SmartMBG.DB sudah otomatis di-init oleh db.js
+        // Pastikan tersedia sebelum digunakan
+        function getDB() {
+            return (typeof SmartMBG !== 'undefined' && SmartMBG.DB) ? SmartMBG.DB : null;
+        }
+
+        // ── DOM CONTENT LOADED INITIALIZER ──
+        document.addEventListener('DOMContentLoaded', function () {
+            // Init DB (aman dipanggil ulang)
+            const DB = getDB();
+            if (DB) {
+                console.log('[penerima.html] SmartMBG.DB terhubung:', DB.getSummaryStats());
+            } else {
+                console.warn('[penerima.html] SmartMBG.DB tidak tersedia, menggunakan localStorage fallback.');
+            }
+            loadReportsList();
+            loadGiziMenu();
+
+            // Set default allergy values from localStorage
+            document.getElementById('allergy-peanut').checked = localStorage.getItem('swarasa_allergy_peanut') === 'true';
+            document.getElementById('allergy-seafood').checked = localStorage.getItem('swarasa_allergy_seafood') === 'true';
+            document.getElementById('allergy-egg').checked = localStorage.getItem('swarasa_allergy_egg') === 'true';
+            document.getElementById('allergy-milk').checked = localStorage.getItem('swarasa_allergy_milk') === 'true';
+
+            // Intolerances & Phobias
+            if (document.getElementById('intolerance-lactose')) {
+                document.getElementById('intolerance-lactose').checked = localStorage.getItem('swarasa_intolerance_lactose') === 'true';
+            }
+            if (document.getElementById('intolerance-gluten')) {
+                document.getElementById('intolerance-gluten').checked = localStorage.getItem('swarasa_intolerance_gluten') === 'true';
+            }
+            if (document.getElementById('phobia-fish')) {
+                document.getElementById('phobia-fish').checked = localStorage.getItem('swarasa_phobia_fish') === 'true';
+            }
+            if (document.getElementById('phobia-onion')) {
+                document.getElementById('phobia-onion').checked = localStorage.getItem('swarasa_phobia_onion') === 'true';
+            }
+
+            // PWA banner state
+            if (localStorage.getItem('swarasa_pwa_dismissed') === 'true') {
+                const banner = document.getElementById('pwa-install-banner');
+                if (banner) banner.style.display = 'none';
+            }
+
+            // Trigger initial check
+            checkAllergyGate();
+
+            // Real-time AI NLP Classifier simulation
+            const descField = document.getElementById('desc-field');
+            if (descField) {
+                descField.addEventListener('input', function () {
+                    const text = this.value.trim().toLowerCase();
+                    const panel = document.getElementById('nlp-panel');
+                    if (text.length < 5) {
+                        panel.style.display = 'none';
+                        return;
+                    }
+                    panel.style.display = 'block';
+
+                    let category = "Pujian & Saran Umum";
+                    let urgency = "Rendah";
+                    let confidence = 85;
+                    let sentiment = "Positif";
+
+                    const criticalKeywords = ["basi", "racun", "muntah", "sakit", "diare", "mulas", "perut", "busuk", "ulat", "belatung", "lalat"];
+                    const negativeKeywords = ["hambar", "sedikit", "kurang", "dikit", "dingin", "keras", "mentah", "kotor", "rambut", "debu", "asam", "pahit"];
+                    const logisticsKeywords = ["telat", "lambat", "siang", "belum datang", "absen", "hujan"];
+
+                    let isCritical = criticalKeywords.some(kw => text.includes(kw));
+                    let isLogistics = logisticsKeywords.some(kw => text.includes(kw));
+                    let isNegative = negativeKeywords.some(kw => text.includes(kw));
+
+                    if (isCritical) {
+                        category = "Keamanan Pangan & Kesehatan";
+                        urgency = "Kritis";
+                        confidence = 96;
+                        sentiment = "Sangat Negatif";
+                    } else if (isLogistics) {
+                        category = "Logistik & Distribusi";
+                        urgency = "Tinggi";
+                        confidence = 91;
+                        sentiment = "Negatif";
+                    } else if (isNegative) {
+                        category = "Kualitas Makanan (Rasa/Porsi)";
+                        urgency = "Sedang";
+                        confidence = 89;
+                        sentiment = "Negatif";
+                    } else {
+                        category = "Pujian / Saran Operasional";
+                        urgency = "Rendah";
+                        confidence = 93;
+                        sentiment = "Positif";
+                    }
+
+                    document.getElementById('nlp-category').innerText = category;
+                    document.getElementById('nlp-urgency').innerText = urgency;
+                    document.getElementById('nlp-confidence').innerText = confidence + "% (IndoBERT)";
+                    document.getElementById('nlp-sentiment').innerText = sentiment;
+
+                    const urgEl = document.getElementById('nlp-urgency');
+                    if (urgency === 'Kritis') {
+                        urgEl.style.color = 'var(--danger)';
+                    } else if (urgency === 'Tinggi') {
+                        urgEl.style.color = 'var(--warning)';
+                    } else if (urgency === 'Sedang') {
+                        urgEl.style.color = '#E65100';
+                    } else {
+                        urgEl.style.color = 'var(--success)';
+                    }
+                });
+            }
+        });
+
+        // ── NAVIGATION ──
+        function navigate(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById('page-' + page).classList.add('active');
+            document.getElementById('nav-' + page).classList.add('active');
+            currentPage = page;
+            window.scrollTo(0, 0);
+
+            if (page === 'gizi' || page === 'beranda') {
+                loadGiziMenu();
+                checkAllergyGate();
+            } else if (page === 'riwayat') {
+                loadReportsList();
+            }
+        }
+
+        // ── RATING ──
+        function setRating(val) {
+            currentRating = val;
+            const hints = ['', 'Sangat buruk', 'Buruk', 'Cukup baik', 'Baik', 'Sangat baik!'];
+            document.getElementById('star-hint').textContent = 'Anda memberi rating ' + val + '/5 bintang — ' + hints[val];
+            document.querySelectorAll('.star-btn').forEach((btn, i) => {
+                btn.classList.toggle('filled', i < val);
+            });
+        }
+
+        function toggleProfile() {
+            document.getElementById('profile-dropdown').classList.toggle('show');
+        }
+
+        window.addEventListener('click', function (e) {
+            if (!e.target.closest('.avatar-btn') && !e.target.closest('.dropdown')) {
+                const drop = document.getElementById('profile-dropdown');
+                if (drop && drop.classList.contains('show')) drop.classList.remove('show');
+            }
+        });
+
+        function logout() {
+            window.location.href = 'index.html';
+        }
+
+        function toggleChip(el) {
+            el.classList.toggle('selected');
+        }
+
+        function countChars(el) {
+            const len = el.value.length;
+            const counter = document.getElementById('char-count');
+            counter.textContent = len;
+            if (len > 200) { el.value = el.value.substring(0, 200); counter.textContent = 200; }
+            counter.style.color = len > 180 ? 'var(--danger)' : 'var(--text-muted)';
+        }
+
+        // ── DYNAMIC REPORTS LOADER ──
+        function loadReportsList() {
+            const container = document.querySelector('.report-list');
+            if (!container) return;
+
+            const DB = getDB();
+            let complaints = DB ? DB.getAllComplaints() : JSON.parse(localStorage.getItem('swarasa_complaints') || '[]');
+
+            if (complaints.length === 0) {
+                // Seed default jika benar-benar kosong (hanya fallback)
+                complaints = [
+                    {
+                        id: 'RPT-2026-06-0892',
+                        title: 'Makanan basi & tidak segar',
+                        desc: 'Makanan tiba sudah basi dan berbau tidak sedap. Anak-anak menolak makan.',
+                        rating: 1,
+                        category: 'Keamanan Pangan & Kesehatan',
+                        urgency: 'Kritis',
+                        date: '3 Jun 2026 · 09:14',
+                        status: 'diproses',
+                        sentiment: 'High Negative',
+                        vendorId: 'V-00001',
+                        vendorName: 'UD Gizi Prima Denpasar',
+                        schoolName: 'SDN 1 Denpasar',
+                    },
+                    {
+                        id: 'RPT-2026-06-0841',
+                        title: 'Menu hari ini sangat enak!',
+                        desc: 'Makanan hari ini sangat enak dan bergizi. Anak-anak sangat senang dan lahap makan.',
+                        rating: 5,
+                        category: 'Pujian & Saran',
+                        urgency: 'Rendah',
+                        date: '2 Jun 2026 · 11:30',
+                        status: 'selesai',
+                        sentiment: 'High Positive',
+                        vendorId: 'V-00001',
+                        vendorName: 'UD Gizi Prima Denpasar',
+                        schoolName: 'SDN 1 Denpasar',
+                    }
+                ];
+                if (DB) {
+                    complaints.forEach(c => DB.saveComplaint && null); // sudah ada di seed DB
+                    localStorage.setItem('swarasa_complaints', JSON.stringify(complaints));
+                } else {
+                    localStorage.setItem('swarasa_complaints', JSON.stringify(complaints));
+                }
+            }
+
+            // Update badges
+            const activeCount = complaints.filter(c => c.status === 'diproses').length;
+            document.querySelectorAll('.nav-badge').forEach(b => {
+                if (b.parentElement.id === 'nav-riwayat') b.textContent = complaints.length;
+            });
+
+            container.innerHTML = '';
+
+            complaints.forEach(c => {
+                const isNeg = c.sentiment && c.sentiment.toLowerCase().includes('neg');
+                const iconClass = isNeg ? 'fa-circle-exclamation' : 'fa-circle-check';
+                const iconBg = isNeg ? 'negative' : 'positive';
+                const ratingStars = '★'.repeat(c.rating) + '☆'.repeat(5 - c.rating);
+
+                let badgeClass = 'diproses';
+                if (c.status === 'selesai') badgeClass = 'selesai';
+
+                let confidence = 92;
+                if (c.urgency === 'Kritis') confidence = 96;
+                else if (c.urgency === 'Tinggi') confidence = 91;
+                else if (c.urgency === 'Rendah') confidence = 93;
+
+                const card = document.createElement('div');
+                card.className = 'report-card';
+                card.dataset.status = c.status;
+                card.innerHTML = `
+      <div class="report-card-header">
+        <div style="display:flex;align-items:flex-start;gap:10px;flex:1">
+          <div class="report-card-icon ${iconBg}"><i class="fas ${iconClass}"></i></div>
+          <div>
+            <div class="report-card-title" style="font-weight: 700; color: var(--text-primary);">${c.title}</div>
+            <div class="report-card-id">${c.id}</div>
+            <div style="display:flex;gap:8px;margin-top:6px;align-items:center;flex-wrap:wrap">
+              <span style="font-size:11px;color:var(--text-muted)">${c.date}</span>
+              <span class="sentiment-badge ${isNeg ? 'neg' : 'pos'}"><i class="fas fa-bolt" style="font-size:9px"></i> ${c.sentiment || 'Neutral'}</span>
+              <span style="font-size:11px;color:#f59e0b;font-weight:700">${ratingStars}</span>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+          <span class="status-pill ${badgeClass}">${c.status.toUpperCase()}</span>
+          <div class="confidence-bar">
+            <span style="font-size:11px;font-weight:600;color:var(--blue-primary)">${confidence}% AI</span>
+            <div class="confidence-track"><div class="confidence-fill" style="width:${confidence}%"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="report-body" style="font-size:13.5px; margin: 10px 0; color: var(--text-secondary);">${c.desc}</div>
+      <div class="report-tags" style="display:flex; gap:6px;">
+        <span class="report-tag blue">${c.category}</span>
+        <span class="report-tag" style="background:var(--bg-page);color:var(--text-secondary)">Urgensi: ${c.urgency}</span>
+      </div>
+      <div class="report-actions" style="margin-top: 12px; display: flex; gap: 8px;">
+        <a class="btn-small outline-blue" onclick="showReportDetail('${c.id}')"><i class="fas fa-eye" style="font-size:11px"></i> Detail</a>
+        <a class="btn-small outline-teal" onclick="editReport('${c.id}')"><i class="fas fa-pen" style="font-size:11px"></i> Edit</a>
+        <a class="btn-small" style="border-color:#ffcdd2; color:#d32f2f; background:#fff5f5; display: inline-flex; align-items: center;" onclick="deleteReport('${c.id}')"><i class="fas fa-trash" style="font-size:11px"></i> Hapus</a>
+      </div>
+    `;
+                container.appendChild(card);
+            });
+
+            // Update Beranda tracking card
+            const trackingId = document.querySelector('.tracker-id');
+            if (trackingId && complaints.length > 0) {
+                const latest = complaints[0];
+                trackingId.innerText = latest.id;
+                document.querySelector('.tracker-title').innerText = latest.title;
+                document.querySelector('.tracker-meta').innerText = `Dilaporkan: ${latest.date} · Kategori: ${latest.category}`;
+                const badge = document.querySelector('.tracker-status-badge');
+                badge.className = 'tracker-status-badge';
+                badge.innerHTML = latest.status === 'diproses' ? '<i class="fas fa-circle-notch fa-spin"></i> Sedang Diproses' : '<i class="fas fa-circle-check"></i> Selesai';
+                if (latest.status === 'selesai') {
+                    document.querySelectorAll('.step-circle').forEach(circle => {
+                        circle.className = 'step-circle done';
+                        circle.innerHTML = '<i class="fas fa-check"></i>';
+                    });
+                    document.querySelectorAll('.step-connector').forEach(conn => conn.classList.add('done'));
+                    document.querySelector('.step-label.active-lbl').className = 'step-label';
+                }
+            }
+        }
+
+        // ── LOAD GIZI MENU ──
+        function loadGiziMenu() {
+            const DB = getDB();
+            let todayMenu = DB ? DB.getTodayMenu() : JSON.parse(localStorage.getItem('swarasa_today_menu') || '["Nasi Putih", "Ayam Goreng", "Tumis Kangkung", "Tempe", "Buah Pisang"]');
+            const container = document.querySelector('.gizi-menu-card');
+            if (container) {
+                let html = `<h4><i class="fas fa-utensils" style="color:var(--teal);margin-right:6px"></i> Menu Hari Ini</h4>`;
+                todayMenu.forEach(item => {
+                    html += `<div class="menu-line" style="padding: 4px 0; border-bottom: 1px solid var(--border);"><i class="fas fa-circle-dot" style="font-size:8px;color:var(--teal);margin-right:6px"></i><strong>${item}</strong></div>`;
+                });
+                const today = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+                html += `<div class="menu-date" style="margin-top:10px; border-top:1px solid var(--border); padding-top:8px;"><i class="fas fa-calendar-days" style="font-size:10px"></i> ${today}</div>`;
+                container.innerHTML = html;
+            }
+
+            const berandaMenu = document.querySelector('.info-card .menu-items');
+            if (berandaMenu) {
+                let html = '';
+                todayMenu.forEach(item => {
+                    html += `<div class="menu-item"><i class="fas fa-circle-dot" style="font-size:10px; color:var(--teal); margin-right:6px"></i> ${item}</div>`;
+                });
+                berandaMenu.innerHTML = html;
+            }
+
+            const berandaMenuSub = document.querySelector('.info-card .info-card-sub');
+            if (berandaMenuSub) {
+                const today = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+                berandaMenuSub.textContent = today;
+            }
+
+            // Update vendor info on Beranda if DB is available
+            const scoreCardVal = document.querySelector('.vendor-info .vendor-score');
+            if (DB && scoreCardVal) {
+                const score = DB.getVendorScore();
+                const status = DB.getVendorStatus();
+                const statusText = status === 'soft-suspend' ? 'Ditangguhkan' : status === 'warning' ? 'Waspada' : 'Aman';
+                const statusColor = status === 'soft-suspend' ? 'var(--danger)' : status === 'warning' ? 'var(--warning)' : 'var(--success)';
+                const statusBg = status === 'soft-suspend' ? 'var(--danger-light)' : status === 'warning' ? 'var(--warning-light)' : 'var(--success-light)';
+
+                scoreCardVal.style.background = statusBg;
+                scoreCardVal.style.color = statusColor;
+                scoreCardVal.innerHTML = `<i class="fas fa-shield-halved" style="font-size:10px"></i> ${statusText} · Skor ${score}/100`;
+            }
+
+            // ── DYNAMIC NUTRITIONAL CALCULATION ──
+            const dict = DB ? DB.getFoodDictionary() : JSON.parse(localStorage.getItem('swarasa_food_dictionary') || '{}');
+            const standards = DB ? DB.getGiziStandards() : JSON.parse(localStorage.getItem('swarasa_gizi_standards') || '[]');
+            const std = standards.find(s => s.level.startsWith('SD')) || { kcal: 600, protein: 15, fat: 20, carb: 90 };
+
+            // Render standards dynamically in gizi-std-card
+            const stdCard = document.querySelector('.gizi-std-card');
+            if (stdCard) {
+                stdCard.innerHTML = `
+      <h4><i class="fas fa-chart-bar" style="color:var(--blue-primary);margin-right:6px"></i> Standar Gizi</h4>
+      <div class="std-row"><span>Kalori</span><span>${std.kcal} kcal</span></div>
+      <div class="std-row"><span>Protein</span><span>${std.protein} g</span></div>
+      <div class="std-row"><span>Lemak</span><span>${std.fat || 18} g</span></div>
+      <div class="std-row"><span>Karbohidrat</span><span>${std.carb || 80} g</span></div>
+    `;
+            }
+
+            let totalKcal = 0;
+            let totalProtein = 0;
+            let totalFat = 0;
+
+            todayMenu.forEach(item => {
+                let nut = null;
+                for (const key in dict) {
+                    if (dict[key].standard === item) {
+                        nut = dict[key];
+                        break;
+                    }
+                }
+
+                // Fallback static mapping
+                if (!nut) {
+                    const staticDict = {
+                        "Nasi Putih": { kcal: 150, protein: 3, fat: 0.5 },
+                        "Ayam Goreng": { kcal: 220, protein: 18, fat: 14 },
+                        "Tempe Goreng": { kcal: 110, protein: 7, fat: 8 },
+                        "Tumis Kangkung": { kcal: 50, protein: 2, fat: 3 },
+                        "Buah Pisang": { kcal: 90, protein: 1, fat: 0.2 },
+                        "Susu Sapi UHT": { kcal: 120, protein: 7, fat: 7 },
+                        "Telur Puyuh Rebus": { kcal: 90, protein: 6, fat: 6 },
+                        "Udang Krispi Saus Tiram": { kcal: 180, protein: 14, fat: 10 },
+                        "Saus Bumbu Kacang": { kcal: 130, protein: 4, fat: 11 },
+                        "Tahu Sutra Goreng": { kcal: 80, protein: 6, fat: 5 },
+                        "Kecap Manis Kedelai": { kcal: 20, protein: 0.5, fat: 0 },
+                        "Telur Dadar Cincang": { kcal: 140, protein: 10, fat: 10 }
+                    };
+                    nut = staticDict[item];
+                }
+
+                if (nut) {
+                    totalKcal += nut.kcal || 0;
+                    totalProtein += nut.protein || 0;
+                    totalFat += nut.fat || 0;
+                }
+            });
+
+            let totalCarb = Math.max(0, Math.round((totalKcal - (totalProtein * 4) - (totalFat * 9)) / 4));
+
+            const analysisContainer = document.getElementById('gizi-analysis-container');
+            if (analysisContainer) {
+                const kcalStatus = totalKcal >= std.kcal ? { label: '✓ Baik', class: 'gizi-status-ok', valClass: '', barClass: '', text: 'Sesuai' } : { label: '⚠ Dibawah', class: 'gizi-status-warn', valClass: 'warn', barClass: 'warn', text: `${std.kcal - totalKcal} kcal kurang` };
+                const proteinStatus = totalProtein >= std.protein ? { label: '✓ Baik', class: 'gizi-status-ok', valClass: '', barClass: '', text: 'Sesuai' } : { label: '⚠ Dibawah', class: 'gizi-status-warn', valClass: 'warn', barClass: 'warn', text: `${std.protein - totalProtein} g kurang` };
+                const fatStatus = totalFat >= (std.fat || 18) ? { label: '✓ Baik', class: 'gizi-status-ok', valClass: '', barClass: '', text: 'Sesuai' } : { label: '⚠ Dibawah', class: 'gizi-status-warn', valClass: 'warn', barClass: 'warn', text: `${(std.fat || 18) - totalFat} g kurang` };
+                const carbStatus = totalCarb >= (std.carb || 80) ? { label: '✓ Baik', class: 'gizi-status-ok', valClass: '', barClass: '', text: 'Sesuai' } : { label: '⚠ Dibawah', class: 'gizi-status-warn', valClass: 'warn', barClass: 'warn', text: `${(std.carb || 80) - totalCarb} g kurang` };
+
+                const kcalPct = Math.min(100, Math.round((totalKcal / std.kcal) * 100));
+                const proteinPct = Math.min(100, Math.round((totalProtein / std.protein) * 100));
+                const fatPct = Math.min(100, Math.round((totalFat / (std.fat || 18)) * 100));
+                const carbPct = Math.min(100, Math.round((totalCarb / (std.carb || 80)) * 100));
+
+                let kcalSuggestion = totalKcal < std.kcal ? `<div class="gizi-warning-hint"><i class="fas fa-triangle-exclamation" style="font-size:11px;flex-shrink:0;margin-top:1px"></i><span><strong>Saran:</strong> Tambahkan camilan bergizi atau naikkan porsi nasi 1/4 mangkuk.</span></div>` : '';
+                let proteinSuggestion = totalProtein < std.protein ? `<div class="gizi-warning-hint"><i class="fas fa-triangle-exclamation" style="font-size:11px;flex-shrink:0;margin-top:1px"></i><span><strong>Saran:</strong> Tambahkan sumber protein seperti telur rebus atau tahu goreng.</span></div>` : '';
+
+                let failedMetrics = 0;
+                if (totalKcal < std.kcal) failedMetrics++;
+                if (totalProtein < std.protein) failedMetrics++;
+                if (totalFat < (std.fat || 18)) failedMetrics++;
+                if (totalCarb < (std.carb || 80)) failedMetrics++;
+
+                let verdictTitle = '';
+                let verdictDesc = '';
+                let verdictClass = '';
+                let verdictIcon = '';
+
+                if (failedMetrics === 0) {
+                    verdictTitle = 'Kelayakan: SANGAT BAIK';
+                    verdictDesc = 'Menu hari ini memenuhi seluruh standar gizi nasional (Kalori, Protein, Lemak, dan Karbohidrat). Sangat baik untuk tumbuh kembang anak.';
+                    verdictClass = 'success';
+                    verdictIcon = 'fa-circle-check';
+                } else if (failedMetrics <= 2) {
+                    verdictTitle = 'Kelayakan: CUKUP BAIK';
+                    verdictDesc = `Menu memenuhi ${4 - failedMetrics} dari 4 kriteria gizi. Kualitas menu secara keseluruhan layak diberikan, namun disarankan menambahkan porsi atau lauk pendukung.`;
+                    verdictClass = 'warning';
+                    verdictIcon = 'fa-triangle-exclamation';
+                } else {
+                    verdictTitle = 'Kelayakan: KURANG MEMADAI';
+                    verdictDesc = 'Menu hari ini tidak memenuhi sebagian besar kriteria gizi minimal BGN. Harap hubungi pihak sekolah/vendor untuk melakukan investigasi.';
+                    verdictClass = 'danger';
+                    verdictIcon = 'fa-circle-xmark';
+                }
+
+                const verdictColors = {
+                    success: { bg: '#e8f5e9', border: '#a5d6a7', textColor: '#1b5e20', iconColor: 'var(--success)' },
+                    warning: { bg: '#fffde7', border: '#ffe082', textColor: '#e65100', iconColor: '#f57f17' },
+                    danger: { bg: '#ffebee', border: '#ffcdd2', textColor: '#c62828', iconColor: 'var(--danger)' }
+                };
+                const colors = verdictColors[verdictClass];
+
+                analysisContainer.innerHTML = `
+      <div class="gizi-analysis-title">Hasil Analisis Gizi</div>
+      <div class="gizi-metric-grid">
+        <div class="gizi-metric">
+          <div class="gizi-metric-header">
+            <span class="gizi-metric-name">Kalori</span>
+            <span class="${kcalStatus.class}">${kcalStatus.label}</span>
+          </div>
+          <div class="gizi-metric-val ${kcalStatus.valClass}">${totalKcal} kcal</div>
+          <div class="gizi-metric-std">Standar: ${std.kcal} kcal (${kcalStatus.text})</div>
+          <div class="gizi-bar-track"><div class="gizi-bar-fill ${kcalStatus.barClass}" style="width:${kcalPct}%"></div></div>
+          ${kcalSuggestion}
+        </div>
+        
+        <div class="gizi-metric">
+          <div class="gizi-metric-header">
+            <span class="gizi-metric-name">Protein</span>
+            <span class="${proteinStatus.class}">${proteinStatus.label}</span>
+          </div>
+          <div class="gizi-metric-val ${proteinStatus.valClass}">${totalProtein} g</div>
+          <div class="gizi-metric-std">Standar: ${std.protein} g (${proteinStatus.text})</div>
+          <div class="gizi-bar-track"><div class="gizi-bar-fill ${proteinStatus.barClass}" style="width:${proteinPct}%"></div></div>
+          ${proteinSuggestion}
+        </div>
+        
+        <div class="gizi-metric">
+          <div class="gizi-metric-header">
+            <span class="gizi-metric-name">Lemak</span>
+            <span class="${fatStatus.class}">${fatStatus.label}</span>
+          </div>
+          <div class="gizi-metric-val ${fatStatus.valClass}">${totalFat} g</div>
+          <div class="gizi-metric-std">Standar: ${std.fat || 18} g (${fatStatus.text})</div>
+          <div class="gizi-bar-track"><div class="gizi-bar-fill ${fatStatus.barClass}" style="width:${fatPct}%"></div></div>
+        </div>
+        
+        <div class="gizi-metric">
+          <div class="gizi-metric-header">
+            <span class="gizi-metric-name">Karbohidrat</span>
+            <span class="${carbStatus.class}">${carbStatus.label}</span>
+          </div>
+          <div class="gizi-metric-val ${carbStatus.valClass}">${totalCarb} g</div>
+          <div class="gizi-metric-std">Standar: ${std.carb || 80} g (${carbStatus.text})</div>
+          <div class="gizi-bar-track"><div class="gizi-bar-fill ${carbStatus.barClass}" style="width:${carbPct}%"></div></div>
+        </div>
+      </div>
+      
+      <div class="section-title">Panduan Kelayakan Gizi</div>
+      <div class="verdict-card" style="background:${colors.bg}; border:1px solid ${colors.border};">
+        <i class="fas ${verdictIcon}" style="color:${colors.iconColor};"></i>
+        <div>
+          <div class="verdict-title" style="color:${colors.iconColor};">${verdictTitle}</div>
+          <div class="verdict-desc" style="color:${colors.textColor};">${verdictDesc}</div>
+        </div>
+      </div>
+    `;
+            }
+        }
+
+        // ── ALLERGY GATE CHECK ──
+        function checkAllergyGate() {
+            const isPeanut = document.getElementById('allergy-peanut').checked;
+            const isSeafood = document.getElementById('allergy-seafood').checked;
+            const isEgg = document.getElementById('allergy-egg').checked;
+            const isMilk = document.getElementById('allergy-milk').checked;
+
+            const isLactose = document.getElementById('intolerance-lactose').checked;
+            const isGluten = document.getElementById('intolerance-gluten').checked;
+
+            const isFishPhobia = document.getElementById('phobia-fish').checked;
+            const isOnionPhobia = document.getElementById('phobia-onion').checked;
+
+            localStorage.setItem('swarasa_allergy_peanut', isPeanut);
+            localStorage.setItem('swarasa_allergy_seafood', isSeafood);
+            localStorage.setItem('swarasa_allergy_egg', isEgg);
+            localStorage.setItem('swarasa_allergy_milk', isMilk);
+            localStorage.setItem('swarasa_intolerance_lactose', isLactose);
+            localStorage.setItem('swarasa_intolerance_gluten', isGluten);
+            localStorage.setItem('swarasa_phobia_fish', isFishPhobia);
+            localStorage.setItem('swarasa_phobia_onion', isOnionPhobia);
+
+            const DB = getDB();
+            let todayMenu = DB ? DB.getTodayMenu() : JSON.parse(localStorage.getItem('swarasa_today_menu') || '["Nasi Putih", "Ayam Goreng", "Tumis Kangkung", "Tempe", "Buah Pisang"]');
+            const dict = DB ? DB.getFoodDictionary() : JSON.parse(localStorage.getItem('swarasa_food_dictionary') || '{}');
+            const standards = DB ? DB.getGiziStandards() : JSON.parse(localStorage.getItem('swarasa_gizi_standards') || '[]');
+            const std = standards.find(s => s.level.startsWith('SD')) || { kcal: 600 };
+
+            let totalKcal = 0;
+            todayMenu.forEach(item => {
+                let nut = null;
+                for (const key in dict) {
+                    if (dict[key].standard === item) { nut = dict[key]; break; }
+                }
+                if (!nut) {
+                    const staticDict = {
+                        "Nasi Putih": { kcal: 150 },
+                        "Ayam Goreng": { kcal: 220 },
+                        "Tempe Goreng": { kcal: 110 },
+                        "Tumis Kangkung": { kcal: 50 },
+                        "Buah Pisang": { kcal: 90 },
+                        "Susu Sapi UHT": { kcal: 120 },
+                        "Telur Puyuh Rebus": { kcal: 90 },
+                        "Udang Krispi Saus Tiram": { kcal: 180 },
+                        "Saus Bumbu Kacang": { kcal: 130 },
+                        "Tahu Sutra Goreng": { kcal: 80 },
+                        "Kecap Manis Kedelai": { kcal: 20 },
+                        "Telur Dadar Cincang": { kcal: 140 }
+                    };
+                    nut = staticDict[item];
+                }
+                if (nut) totalKcal += nut.kcal || 0;
+            });
+
+            let triggered = [];
+            todayMenu.forEach(item => {
+                const it = item.toLowerCase();
+                if (isPeanut && (it.includes('kacang') || it.includes('peanut'))) {
+                    triggered.push(`Alergen Kacang ('${item}')`);
+                }
+                if (isSeafood && (it.includes('udang') || it.includes('cumi') || it.includes('kepiting') || it.includes('seafood'))) {
+                    triggered.push(`Alergen Seafood ('${item}')`);
+                }
+                if (isEgg && (it.includes('telur') || it.includes('egg') || it.includes('puyuh'))) {
+                    triggered.push(`Alergen Telur ('${item}')`);
+                }
+                if (isMilk && (it.includes('susu') || it.includes('keju') || it.includes('dairy') || it.includes('mentega'))) {
+                    triggered.push(`Alergen Susu Sapi ('${item}')`);
+                }
+                if (isLactose && (it.includes('susu') || it.includes('keju') || it.includes('dairy') || it.includes('mentega') || it.includes('laktosa'))) {
+                    triggered.push(`Intoleran Laktosa ('${item}')`);
+                }
+                if (isGluten && (it.includes('mie') || it.includes('roti') || it.includes('terigu') || it.includes('gandum') || it.includes('gluten'))) {
+                    triggered.push(`Intoleran Gluten ('${item}')`);
+                }
+                if (isFishPhobia && (it.includes('ikan') || it.includes('seafood') || it.includes('udang') || it.includes('cumi'))) {
+                    triggered.push(`Fobia Ikan/Seafood ('${item}')`);
+                }
+                if (isOnionPhobia && (it.includes('bawang') || it.includes('onion') || it.includes('kangkung'))) {
+                    triggered.push(`Fobia Bawang/Sayur ('${item}')`);
+                }
+            });
+
+            const banner = document.getElementById('allergy-gate-banner');
+            const msgEl = document.getElementById('allergy-gate-msg');
+
+            if (triggered.length > 0) {
+                banner.style.display = 'flex';
+                msgEl.innerHTML = `Menu hari ini memicu kondisi khusus Anda: <strong>${triggered.join(', ')}</strong>. Mohon berikan alternatif makanan atau hubungi pihak sekolah/vendor untuk substitusi aman.`;
+                const warningText = document.querySelector('.menu-warning');
+                if (warningText) {
+                    warningText.style.background = '#fef2f2';
+                    warningText.style.color = '#d32f2f';
+                    warningText.style.borderColor = '#ffcdd2';
+                    warningText.innerHTML = `<i class="fas fa-circle-xmark"></i> WARNING: Bahan Pemicu Kondisi Khusus Terdeteksi!`;
+                }
+            } else {
+                banner.style.display = 'none';
+                const warningText = document.querySelector('.menu-warning');
+                if (warningText) {
+                    if (totalKcal < std.kcal) {
+                        warningText.style.background = 'var(--warning-light)';
+                        warningText.style.color = 'var(--warning)';
+                        warningText.style.borderColor = '#ffe082';
+                        warningText.innerHTML = `<i class="fas fa-triangle-exclamation"></i> Kalori: ${totalKcal} kkal · Standar Min ${std.kcal} kkal (Kurang)`;
+                    } else {
+                        warningText.style.background = 'var(--success-light)';
+                        warningText.style.color = 'var(--success)';
+                        warningText.style.borderColor = '#a5d6a7';
+                        warningText.innerHTML = `<i class="fas fa-circle-check"></i> Kalori: ${totalKcal} kkal · Standar Min ${std.kcal} kkal (Sesuai)`;
+                    }
+                }
+            }
+        }
+
+        function installPWA() {
+            showToast('PWA Berhasil di-install ke Home Screen Anda!', 'success');
+            dismissPWABanner();
+        }
+
+        function dismissPWABanner() {
+            const banner = document.getElementById('pwa-install-banner');
+            if (banner) banner.style.display = 'none';
+            localStorage.setItem('swarasa_pwa_dismissed', 'true');
+        }
+
+        // ── SUBMIT REPORT ──
+        let editingReportId = null;
+
+        function editReport(id) {
+            const complaints = JSON.parse(localStorage.getItem('swarasa_complaints') || '[]');
+            const report = complaints.find(c => c.id === id);
+            if (!report) return;
+
+            editingReportId = id;
+
+            // Navigate to Laporan Page
+            navigate('laporan');
+
+            // Change form titles
+            document.querySelector('#page-laporan .page-title').innerText = 'Edit Laporan';
+            document.querySelector('#page-laporan .form-card-title').innerText = 'Edit Laporan ' + id;
+            document.querySelector('#page-laporan .submit-btn').innerHTML = '<i class="fas fa-save"></i> Simpan Perubahan Laporan';
+
+            // Add a cancel button if not already there
+            if (!document.getElementById('cancel-edit-btn')) {
+                const cancelBtn = document.createElement('button');
+                cancelBtn.id = 'cancel-edit-btn';
+                cancelBtn.type = 'button';
+                cancelBtn.className = 'btn-small';
+                cancelBtn.style = 'margin-top: 12px; width: 100%; height: 42px; border-color: var(--border); background: #f8fafc; color: var(--text-secondary); display: flex; align-items: center; justify-content: center; font-weight: 600; cursor: pointer; font-family: inherit; border-radius: var(--radius-md);';
+                cancelBtn.innerHTML = 'Batal Edit';
+                cancelBtn.onclick = resetLaporanForm;
+                document.querySelector('#page-laporan .form-card').appendChild(cancelBtn);
+            }
+
+            // Populate fields
+            document.getElementById('desc-field').value = report.desc;
+            setRating(report.rating);
+
+            // Reset selected chips
+            document.querySelectorAll('.problem-chip').forEach(chip => {
+                chip.classList.remove('selected');
+                const chipText = chip.textContent.trim();
+                if (report.title.includes(chipText)) {
+                    chip.classList.add('selected');
+                }
+            });
+
+            // Trigger NLP live analysis
+            const descField = document.getElementById('desc-field');
+            const event = new Event('input');
+            descField.dispatchEvent(event);
+
+            // Scroll to top
+            window.scrollTo(0, 0);
+        }
+
+        function resetLaporanForm() {
+            editingReportId = null;
+            document.querySelector('#page-laporan .page-title').innerText = 'Buat Laporan Baru';
+            document.querySelector('#page-laporan .form-card-title').innerText = 'Form Laporan MBG';
+            document.querySelector('#page-laporan .submit-btn').innerHTML = '<i class="fas fa-paper-plane"></i> Kirim Laporan Saya';
+
+            const cancelBtn = document.getElementById('cancel-edit-btn');
+            if (cancelBtn) cancelBtn.remove();
+
+            document.getElementById('desc-field').value = '';
+            setRating(3);
+            document.querySelectorAll('.problem-chip').forEach(c => c.classList.remove('selected'));
+            document.getElementById('char-count').textContent = '0';
+            document.getElementById('nlp-panel').style.display = 'none';
+        }
+
+        function deleteReport(id) {
+            if (!confirm('Apakah Anda yakin ingin menghapus laporan ' + id + '?')) return;
+
+            const DB = getDB();
+            if (DB) {
+                const complaints = DB.getAllComplaints();
+                const hasOtherCritical = complaints.filter(c => c.id !== id).some(c => c.urgency === 'Kritis' && c.status === 'diproses');
+                DB.deleteComplaint(id);
+                if (!hasOtherCritical) {
+                    localStorage.setItem('swarasa_vendor_status', 'normal');
+                    localStorage.setItem('swarasa_vendor_score', '88');
+                }
+            } else {
+                let complaints = JSON.parse(localStorage.getItem('swarasa_complaints') || '[]');
+                const reportIndex = complaints.findIndex(c => c.id === id);
+                if (reportIndex === -1) return;
+                complaints.splice(reportIndex, 1);
+                localStorage.setItem('swarasa_complaints', JSON.stringify(complaints));
+                const hasOtherCritical = complaints.some(c => c.urgency === 'Kritis' && c.status === 'diproses');
+                if (!hasOtherCritical) {
+                    localStorage.setItem('swarasa_vendor_status', 'normal');
+                    localStorage.setItem('swarasa_vendor_score', '88');
+                }
+            }
+
+            showToast('Laporan ' + id + ' berhasil dihapus.', 'success');
+            loadReportsList();
+        }
+
+        function showReportDetail(id) {
+            const DB = getDB();
+            const complaints = DB ? DB.getAllComplaints() : JSON.parse(localStorage.getItem('swarasa_complaints') || '[]');
+            const report = complaints.find(c => c.id === id);
+            if (!report) return;
+            alert(`DETAIL LAPORAN ${report.id}\n----------------------------------\nKategori: ${report.category}\nUrgensi: ${report.urgency}\nRating: ${report.rating}/5\nTanggal: ${report.date}\nStatus: ${report.status.toUpperCase()}\nSekolah: ${report.schoolName || '-'}\nVendor: ${report.vendorName || '-'}\n\nDeskripsi:\n"${report.desc}"`);
+        }
+
+        function submitReport() {
+            const descVal = document.getElementById('desc-field').value.trim();
+            if (!descVal) {
+                showToast('Harap isi deskripsi laporan Anda.', 'error');
+                return;
+            }
+
+            const selectedChips = [];
+            document.querySelectorAll('.problem-chip.selected').forEach(c => {
+                selectedChips.push(c.textContent.trim());
+            });
+
+            const text = descVal.toLowerCase();
+            let category = "Pujian & Saran";
+            let urgency = "Rendah";
+
+            const criticalKeywords = ["basi", "racun", "muntah", "sakit", "diare", "mulas", "perut", "busuk", "ulat", "belatung", "lalat"];
+            const logisticsKeywords = ["telat", "lambat", "siang", "belum datang", "absen", "hujan"];
+
+            let isCritical = criticalKeywords.some(kw => text.includes(kw));
+            let isLogistics = logisticsKeywords.some(kw => text.includes(kw));
+
+            if (isCritical) {
+                category = "Keamanan Pangan & Kesehatan";
+                urgency = "Kritis";
+            } else if (isLogistics) {
+                category = "Logistik & Distribusi";
+                urgency = "Tinggi";
+            } else if (text.includes("sedikit") || text.includes("kurang") || text.includes("dikit")) {
+                category = "Kualitas Makanan (Porsi)";
+                urgency = "Sedang";
+            }
+
+            const DB = getDB();
+
+            if (editingReportId) {
+                const updates = {
+                    title: selectedChips.length > 0 ? selectedChips.join(', ') : (descVal.length > 30 ? descVal.substring(0, 30) + '...' : descVal),
+                    desc: descVal,
+                    rating: currentRating,
+                    category: category,
+                    urgency: urgency,
+                    sentiment: isCritical ? 'High Negative' : (urgency === 'Rendah' ? 'Positive' : 'Negative'),
+                    date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) + ' · ' + new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' (Diedit)',
+                };
+                if (DB) {
+                    DB.updateComplaint(editingReportId, updates);
+                } else {
+                    let complaints = JSON.parse(localStorage.getItem('swarasa_complaints') || '[]');
+                    const idx = complaints.findIndex(c => c.id === editingReportId);
+                    if (idx !== -1) { Object.assign(complaints[idx], updates); localStorage.setItem('swarasa_complaints', JSON.stringify(complaints)); }
+                }
+                showToast('Laporan berhasil diperbarui!', 'success');
+                resetLaporanForm();
+            } else {
+                const reportId = 'RPT-' + new Date().getFullYear() + '-' + String(new Date().getMonth() + 1).padStart(2, '0') + '-' + String(Math.floor(1000 + Math.random() * 9000));
+
+                const nameVal = document.getElementById('reporter-name').value.trim() || 'Siti Rahayu';
+                const roleVal = document.getElementById('reporter-role').value;
+                const phoneVal = document.getElementById('reporter-phone').value.trim() || '0812-3456-7890';
+
+                // Ambil school & SPPG dari DB jika tersedia
+                const schools = DB ? DB.getAllSchools() : [];
+                const school = schools[0] || null;
+                const sppgList = DB ? DB.getAllSPPG() : [];
+                const sppg = school ? sppgList.find(s => s.id === school.sppgId) : null;
+
+                const newReport = {
+                    id: reportId,
+                    title: selectedChips.length > 0 ? selectedChips.join(', ') : (descVal.length > 30 ? descVal.substring(0, 30) + '...' : descVal),
+                    desc: descVal,
+                    rating: currentRating,
+                    category: category,
+                    urgency: urgency,
+                    date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) + ' · ' + new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+                    status: 'diproses',
+                    sentiment: isCritical ? 'High Negative' : (urgency === 'Rendah' ? 'Positive' : 'Negative'),
+                    vendorId: sppg ? sppg.id : 'V-00001',
+                    vendorName: sppg ? sppg.name : 'UD Gizi Prima Denpasar',
+                    schoolName: school ? school.name : 'SDN 1 Denpasar',
+                    reporterName: nameVal,
+                    reporterRole: roleVal,
+                    reporterPhone: phoneVal,
+                };
+
+                if (DB) {
+                    DB.saveComplaint(newReport);
+                } else {
+                    let complaints = JSON.parse(localStorage.getItem('swarasa_complaints') || '[]');
+                    complaints.unshift(newReport);
+                    localStorage.setItem('swarasa_complaints', JSON.stringify(complaints));
+                }
+
+                // Update vendor status
+                if (isCritical) {
+                    localStorage.setItem('swarasa_vendor_status', 'soft-suspend');
+                    localStorage.setItem('swarasa_vendor_alert', descVal);
+                    localStorage.setItem('swarasa_vendor_score', '54');
+                } else if (urgency === 'Tinggi' || urgency === 'Sedang') {
+                    localStorage.setItem('swarasa_vendor_score', '72');
+                    if (localStorage.getItem('swarasa_vendor_status') !== 'soft-suspend') {
+                        localStorage.setItem('swarasa_vendor_status', 'warning');
+                    }
+                }
+
+                showToast('Laporan berhasil diklasifikasi AI Swarasa & dikirim!', 'success');
+            }
+
+            setTimeout(() => {
+                navigate('riwayat');
+                loadReportsList();
+            }, 1200);
+        }
+
+
+        // ── FILTER REPORTS ──
+        function filterReports(el, filter) {
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            document.querySelectorAll('.report-card').forEach(card => {
+                if (filter === 'semua') { card.style.display = 'block'; }
+                else { card.style.display = card.dataset.status === filter ? 'block' : 'none'; }
+            });
+        }
+
+        let unreadCount = 4;
+        function markAllRead() {
+            for (let i = 1; i <= 4; i++) {
+                const el = document.getElementById('notif-' + i);
+                const dot = document.getElementById('dot-' + i);
+                if (el) el.classList.remove('unread');
+                if (dot) dot.style.display = 'none';
+            }
+            const sub = document.querySelector('#page-notifikasi .page-sub');
+            if (sub) sub.textContent = 'Semua notifikasi telah dibaca';
+            showToast('Semua notifikasi ditandai sebagai dibaca', 'success');
+        }
+
+        function showToast(msg, type) {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toast-icon');
+            const msgEl = document.getElementById('toast-msg');
+            toast.className = 'show ' + (type || 'success');
+            icon.className = type === 'success' ? 'fas fa-circle-check' : type === 'error' ? 'fas fa-circle-xmark' : 'fas fa-circle-info';
+            msgEl.textContent = msg;
+            clearTimeout(window._toastTimer);
+            window._toastTimer = setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        window.addEventListener('offline', () => document.getElementById('offline-banner').classList.add('show'));
+        window.addEventListener('online', () => document.getElementById('offline-banner').classList.remove('show'));
+    </script>
+
+
+</body>
+
+</html>
