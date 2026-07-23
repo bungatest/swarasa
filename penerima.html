@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SWARASA — Portal Pengguna</title>
+    <link rel="icon" href="logo.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
     <link
@@ -2960,12 +2961,12 @@
         }
 
         // ── DYNAMIC REPORTS LOADER ──
-        function loadReportsList() {
+        async function loadReportsList() {
             const container = document.querySelector('.report-list');
             if (!container) return;
 
             const DB = getDB();
-            let complaints = DB ? DB.getAllComplaints() : JSON.parse(localStorage.getItem('swarasa_complaints') || '[]');
+            let complaints = DB ? await DB.getAllComplaints() : JSON.parse(localStorage.getItem('swarasa_complaints') || '[]');
 
             if (complaints.length === 0) {
                 // Seed default jika benar-benar kosong (hanya fallback)
@@ -3493,17 +3494,17 @@
             document.getElementById('nlp-panel').style.display = 'none';
         }
 
-        function deleteReport(id) {
+        async function deleteReport(id) {
             if (!confirm('Apakah Anda yakin ingin menghapus laporan ' + id + '?')) return;
 
             const DB = getDB();
             if (DB) {
-                const complaints = DB.getAllComplaints();
+                const complaints = await DB.getAllComplaints();
                 const hasOtherCritical = complaints.filter(c => c.id !== id).some(c => c.urgency === 'Kritis' && c.status === 'diproses');
-                DB.deleteComplaint(id);
+                await DB.deleteComplaint(id);
                 if (!hasOtherCritical) {
-                    localStorage.setItem('swarasa_vendor_status', 'normal');
-                    localStorage.setItem('swarasa_vendor_score', '88');
+                    await DB.updateVendorInfo('status', 'normal');
+                    await DB.updateVendorInfo('score', '88');
                 }
             } else {
                 let complaints = JSON.parse(localStorage.getItem('swarasa_complaints') || '[]');
@@ -3519,18 +3520,18 @@
             }
 
             showToast('Laporan ' + id + ' berhasil dihapus.', 'success');
-            loadReportsList();
+            await loadReportsList();
         }
 
-        function showReportDetail(id) {
+        async function showReportDetail(id) {
             const DB = getDB();
-            const complaints = DB ? DB.getAllComplaints() : JSON.parse(localStorage.getItem('swarasa_complaints') || '[]');
+            const complaints = DB ? await DB.getAllComplaints() : JSON.parse(localStorage.getItem('swarasa_complaints') || '[]');
             const report = complaints.find(c => c.id === id);
             if (!report) return;
             alert(`DETAIL LAPORAN ${report.id}\n----------------------------------\nKategori: ${report.category}\nUrgensi: ${report.urgency}\nRating: ${report.rating}/5\nTanggal: ${report.date}\nStatus: ${report.status.toUpperCase()}\nSekolah: ${report.schoolName || '-'}\nVendor: ${report.vendorName || '-'}\n\nDeskripsi:\n"${report.desc}"`);
         }
 
-        function submitReport() {
+        async function submitReport() {
             const descVal = document.getElementById('desc-field').value.trim();
             if (!descVal) {
                 showToast('Harap isi deskripsi laporan Anda.', 'error');
@@ -3576,7 +3577,7 @@
                     date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) + ' · ' + new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' (Diedit)',
                 };
                 if (DB) {
-                    DB.updateComplaint(editingReportId, updates);
+                    await DB.updateComplaint(editingReportId, updates);
                 } else {
                     let complaints = JSON.parse(localStorage.getItem('swarasa_complaints') || '[]');
                     const idx = complaints.findIndex(c => c.id === editingReportId);
@@ -3616,22 +3617,23 @@
                 };
 
                 if (DB) {
-                    DB.saveComplaint(newReport);
+                    await DB.addComplaint(newReport);
+                    if (isCritical) {
+                        await DB.updateVendorInfo('status', 'soft-suspend');
+                        await DB.updateVendorInfo('score', '40');
+                    }
                 } else {
                     let complaints = JSON.parse(localStorage.getItem('swarasa_complaints') || '[]');
                     complaints.unshift(newReport);
                     localStorage.setItem('swarasa_complaints', JSON.stringify(complaints));
-                }
-
-                // Update vendor status
-                if (isCritical) {
-                    localStorage.setItem('swarasa_vendor_status', 'soft-suspend');
-                    localStorage.setItem('swarasa_vendor_alert', descVal);
-                    localStorage.setItem('swarasa_vendor_score', '54');
-                } else if (urgency === 'Tinggi' || urgency === 'Sedang') {
-                    localStorage.setItem('swarasa_vendor_score', '72');
-                    if (localStorage.getItem('swarasa_vendor_status') !== 'soft-suspend') {
-                        localStorage.setItem('swarasa_vendor_status', 'warning');
+                    if (isCritical) {
+                        localStorage.setItem('swarasa_vendor_status', 'soft-suspend');
+                        localStorage.setItem('swarasa_vendor_score', '40');
+                    } else if (urgency === 'Tinggi' || urgency === 'Sedang') {
+                        localStorage.setItem('swarasa_vendor_score', '72');
+                        if (localStorage.getItem('swarasa_vendor_status') !== 'soft-suspend') {
+                            localStorage.setItem('swarasa_vendor_status', 'warning');
+                        }
                     }
                 }
 

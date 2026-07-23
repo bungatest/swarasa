@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BGN Command Center — SMART-MBG</title>
+<link rel="icon" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="db.js"></script>
+<style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    :root{
+        --navy:#0f172a; --navy-mid:#16213a; --navy-light:#1e293b;
+        --accent:#3b82f6; --accent-light:#e3eeff;
+        --danger:#e11d48; --danger-light:#fde8ec;
+        --warning:#f59e0b; --warning-light:#fef7e8;
+        --success:#16a34a; --success-light:#e7f7ec;
+        --purple:#7c3aed; --purple-light:#f0e9fd;
+        --text-primary:#0f172a; --text-secondary:#64748b; --text-muted:#94a3b8;
+        --bg-page:#f1f5f9; --bg-white:#ffffff;
+        --border:#e2e8f0; --border-mid:#cbd5e1;
+        --sidebar-w:240px; --header-h:56px;
+        --radius-sm:6px; --radius-md:10px; --radius-lg:14px;
+        --shadow-sm:0 1px 3px rgba(0,0,0,.08); --shadow-md:0 4px 14px rgba(0,0,0,.1);
+        --transition:180ms ease;
+    }
+    body{font-family:'DM Sans',sans-serif;background:var(--bg-page);color:var(--text-primary);min-height:100vh;font-size:14px;line-height:1.5;}
+    a{text-decoration:none;color:inherit;}
+
+    /* TOPBAR */
+    .topbar{position:fixed;top:0;left:0;right:0;z-index:200;height:var(--header-h);background:var(--navy);display:flex;align-items:center;padding:0 20px;gap:16px;}
+    .topbar-brand{display:flex;align-items:center;gap:10px;min-width:210px;}
+    .brand-icon{width:32px;height:32px;border-radius:var(--radius-sm);background:var(--accent);display:flex;align-items:center;justify-content:center;}
+    .brand-icon i{color:#fff;font-size:16px;}
+    .brand-name{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:14.5px;color:#fff;letter-spacing:-.2px;}
+    .brand-sub{font-size:9.5px;color:rgba(255,255,255,.55);letter-spacing:.4px;text-transform:uppercase;}
+    .topbar-search{flex:1;max-width:520px;position:relative;}
+    .topbar-search input{width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:8px 14px 8px 36px;color:#fff;font-size:13px;font-family:inherit;}
+    .topbar-search input::placeholder{color:rgba(255,255,255,.4);}
+    .topbar-search input:focus{outline:none;background:rgba(255,255,255,.14);}
+    .topbar-search i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,.45);font-size:13px;}
+    .topbar-actions{margin-left:auto;display:flex;align-items:center;gap:8px;position:relative;}
+    .topbar-btn{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.1);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;position:relative;}
+    .topbar-btn:hover{background:rgba(255,255,255,.2);}
+    .badge-notif{position:absolute;top:0;right:0;min-width:16px;height:16px;padding:0 3px;border-radius:8px;background:var(--danger);color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid var(--navy);}
+    .avatar-btn{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:none;border-radius:20px;padding:5px 12px 5px 5px;cursor:pointer;color:#fff;font-size:12.5px;font-weight:600;}
+    .avatar-icon{width:26px;height:26px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;}
+
+    .dropdown{position:absolute;top:calc(var(--header-h) + 10px);right:20px;background:#fff;border:1px solid var(--border);border-radius:var(--radius-md);width:250px;box-shadow:var(--shadow-md);z-index:1000;display:none;flex-direction:column;overflow:hidden;}
+    .dropdown.show{display:flex;animation:slideDown .2s ease;}
+    @keyframes slideDown{from{opacity:0;transform:translateY(-10px);}to{opacity:1;transform:translateY(0);}}
+    .dropdown-header{padding:14px 16px;border-bottom:1px solid var(--border);background:var(--bg-page);font-weight:700;font-size:13px;}
+    .dropdown-item{padding:11px 16px;display:flex;gap:10px;align-items:flex-start;font-size:12.5px;color:var(--text-secondary);cursor:pointer;border-bottom:1px solid var(--border);}
+    .dropdown-item:last-child{border-bottom:none;}
+    .dropdown-item:hover{background:var(--bg-page);}
+    .dropdown-item.text-danger{color:var(--danger);}
+
+    /* LAYOUT */
+    .app-layout{display:flex;padding-top:var(--header-h);min-height:100vh;}
+    .sidebar{width:var(--sidebar-w);background:var(--navy);border-right:1px solid rgba(255,255,255,.06);position:fixed;top:var(--header-h);left:0;bottom:0;overflow-y:auto;z-index:100;padding:16px 0;height:calc(100vh - var(--header-h));}
+    .sidebar-section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:rgba(255,255,255,.32);padding:0 18px 6px;margin-top:16px;}
+    .sidebar-section-label:first-child{margin-top:0;}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:9px 18px;cursor:pointer;color:rgba(255,255,255,.65);font-size:13.5px;font-weight:500;position:relative;transition:background var(--transition);}
+    .nav-item:hover{background:rgba(255,255,255,.06);color:#fff;}
+    .nav-item.active{background:rgba(59,130,246,.18);color:#60a5fa;border-right:3px solid var(--accent);font-weight:600;}
+    .nav-item i{font-size:15px;width:18px;text-align:center;flex-shrink:0;}
+    .nav-badge{margin-left:auto;background:var(--danger);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:10px;}
+    .nav-badge.purple{background:var(--purple);}
+
+    .main-content{margin-left:var(--sidebar-w);flex:1;padding:24px;width:calc(100% - var(--sidebar-w));}
+    .page{display:none;} .page.active{display:block;padding-bottom:32px;}
+    .page-header{margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;}
+    .page-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:22px;font-weight:800;letter-spacing:-.4px;}
+    .page-sub{font-size:13px;color:var(--text-secondary);}
+
+    .btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;border:none;cursor:pointer;}
+    .btn:hover{filter:brightness(.95);}
+    .btn-primary{background:var(--accent);color:#fff;}
+    .btn-outline{background:#fff;border:1px solid var(--border-mid);color:var(--text-primary);}
+    .btn-danger{background:var(--danger);color:#fff;}
+    .btn-sm{padding:6px 11px;font-size:12px;}
+
+    .card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-md);padding:18px 20px;margin-bottom:20px;}
+    .section-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:14.5px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+    .section-title span{display:flex;align-items:center;gap:8px;}
+    .section-title i{color:var(--accent);}
+
+    .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+    .kpi-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;display:flex;align-items:center;gap:14px;}
+    .kpi-icon{width:42px;height:42px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .kpi-icon i{font-size:18px;}
+    .kpi-icon.blue{background:var(--accent-light);} .kpi-icon.blue i{color:var(--accent);}
+    .kpi-icon.red{background:var(--danger-light);} .kpi-icon.red i{color:var(--danger);}
+    .kpi-icon.gold{background:var(--warning-light);} .kpi-icon.gold i{color:var(--warning);}
+    .kpi-icon.green{background:var(--success-light);} .kpi-icon.green i{color:var(--success);}
+    .kpi-icon.purple{background:var(--purple-light);} .kpi-icon.purple i{color:var(--purple);}
+    .kpi-val{font-family:'Plus Jakarta Sans',sans-serif;font-size:24px;font-weight:800;line-height:1;}
+    .kpi-lbl{font-size:12px;color:var(--text-secondary);margin-top:2px;}
+    .kpi-note{font-size:10.5px;color:var(--text-muted);margin-top:1px;}
+
+    table{width:100%;border-collapse:collapse;font-size:13px;}
+    th{text-align:left;padding:10px 12px;color:var(--text-muted);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--border);}
+    td{padding:12px;border-bottom:1px solid var(--border);vertical-align:middle;}
+    tr:last-child td{border-bottom:none;}
+    .pill{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+    .pill.green{background:var(--success-light);color:var(--success);}
+    .pill.gold{background:var(--warning-light);color:#b45309;}
+    .pill.red{background:var(--danger-light);color:var(--danger);}
+    .pill.blue{background:var(--accent-light);color:var(--accent);}
+    .pill.gray{background:#F1F5F9;color:var(--text-secondary);}
+    .pill.purple{background:var(--purple-light);color:var(--purple);}
+
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;}
+    .filter-select{padding:7px 12px;border:1px solid var(--border-mid);border-radius:var(--radius-sm);font-size:12.5px;font-family:inherit;background:#fff;}
+
+    /* WORDCLOUD */
+    .wordcloud-box{min-height:220px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:14px;padding:20px;}
+    .wordcloud-box span{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;}
+
+    /* MAP / PROVINCE GRID */
+    .province-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;}
+    .province-card{border:1px solid var(--border);border-radius:var(--radius-md);padding:14px;position:relative;overflow:hidden;}
+    .province-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;}
+    .province-card.status-baik::before{background:var(--success);}
+    .province-card.status-waspada::before{background:var(--warning);}
+    .province-card.status-kritis::before{background:var(--danger);}
+    .province-name{font-weight:700;font-size:13px;margin-bottom:4px;}
+    .province-meta{font-size:11.5px;color:var(--text-secondary);}
+    .province-count{font-family:'Plus Jakarta Sans',sans-serif;font-size:20px;font-weight:800;margin-top:6px;}
+
+    /* RISK LIST */
+    .risk-item{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--border);}
+    .risk-item:last-child{border-bottom:none;}
+    .risk-gauge{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0;color:#fff;}
+    .risk-info{flex:1;}
+    .risk-name{font-weight:700;font-size:13px;}
+    .risk-sub{font-size:11.5px;color:var(--text-secondary);}
+
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:2000;align-items:center;justify-content:center;padding:20px;}
+    .modal-overlay.show{display:flex;animation:fadeIn .18s ease;}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    .modal-box{background:#fff;border-radius:var(--radius-lg);width:100%;max-width:560px;max-height:88vh;overflow-y:auto;box-shadow:var(--shadow-md);}
+    .modal-head{background:var(--navy);color:#fff;padding:18px 22px;border-radius:var(--radius-lg) var(--radius-lg) 0 0;display:flex;justify-content:space-between;align-items:flex-start;}
+    .modal-head h3{font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;display:flex;align-items:center;gap:8px;}
+    .modal-close{background:rgba(255,255,255,.15);border:none;color:#fff;width:26px;height:26px;border-radius:50%;cursor:pointer;}
+    .modal-body{padding:20px 22px;}
+    .form-group{margin-bottom:14px;}
+    .form-group label{display:block;font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;}
+    .form-control{width:100%;padding:10px 12px;border:1px solid var(--border-mid);border-radius:var(--radius-sm);font-family:inherit;font-size:13.5px;}
+    .form-control:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-light);}
+    textarea.form-control{resize:vertical;min-height:70px;}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--navy);color:#fff;padding:12px 20px;border-radius:var(--radius-md);font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;z-index:3000;opacity:0;transition:all .25s ease;box-shadow:var(--shadow-md);}
+    .toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+    .toast.success i{color:#4ade80;} .toast.error i{color:#f87171;} .toast.info i{color:#60a5fa;}
+
+    .escalation-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+    .escalation-label{width:180px;flex-shrink:0;font-size:12.5px;}
+    .escalation-track{flex:1;height:10px;background:#F1F5F9;border-radius:8px;overflow:hidden;}
+    .escalation-fill{height:100%;background:var(--danger);border-radius:8px;}
+    .escalation-count{width:26px;text-align:right;font-weight:700;font-size:12.5px;}
+
+    .empty-state{text-align:center;padding:40px 20px;color:var(--text-muted);}
+    .empty-state i{font-size:32px;margin-bottom:10px;display:block;}
+
+    @media(max-width:1100px){.kpi-grid{grid-template-columns:repeat(2,1fr);} .two-col{grid-template-columns:1fr;} .form-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+    <div class="topbar-brand">
+        <div class="brand-icon" style="background: rgba(255,255,255,0.2); overflow: hidden;"><img src="logo.png" alt="Logo" style="width: 100%; height: 100%; object-fit: cover;"></div>
+        <div><div class="brand-name">BGN Command Center</div><div class="brand-sub">Sistem Pusat SMART-MBG</div></div>
+    </div>
+    <div class="topbar-search">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" placeholder="Cari ID laporan, nama vendor, atau sekolah...">
+    </div>
+    <div class="topbar-actions">
+        <button class="topbar-btn"><i class="fa-solid fa-expand"></i></button>
+        <button class="topbar-btn" onclick="toggleDropdown('notif-dd')"><i class="fa-regular fa-bell"></i><span class="badge-notif">12</span></button>
+        <div class="dropdown" id="notif-dd">
+            <div class="dropdown-header">Notifikasi Sistem</div>
+            <div class="dropdown-item"><i class="fa-solid fa-triangle-exclamation" style="color:var(--danger)"></i> UD Gizi Prima Bali — keracunan massal terlapor</div>
+            <div class="dropdown-item"><i class="fa-solid fa-clock" style="color:var(--warning)"></i> 3 calon mitra menunggu validasi Tahap 4</div>
+            <div class="dropdown-item"><i class="fa-solid fa-user-check" style="color:var(--accent)"></i> 1 kasus memerlukan verifikasi manusia</div>
+        </div>
+        <button class="avatar-btn" onclick="toggleDropdown('user-dd')"><span class="avatar-icon">A</span> Admin Pusat</button>
+        <div class="dropdown" id="user-dd">
+            <div class="dropdown-header">Admin Pusat BGN</div>
+            <div class="dropdown-item"><i class="fa-regular fa-user"></i> Profil Saya</div>
+            <div class="dropdown-item"><i class="fa-solid fa-gear"></i> Pengaturan Sistem</div>
+            <div class="dropdown-item text-danger"><i class="fa-solid fa-right-from-bracket"></i> Keluar</div>
+        </div>
+    </div>
+</div>
+
+<div class="app-layout">
+    <div class="sidebar">
+        <div class="sidebar-section-label">Monitoring Nasional</div>
+        <div class="nav-item active" data-page="dashboard" onclick="navigate('dashboard')"><i class="fa-solid fa-chart-pie"></i> Dashboard Utama</div>
+        <div class="nav-item" data-page="peta" onclick="navigate('peta')"><i class="fa-solid fa-map-location-dot"></i> Peta Sebaran</div>
+        <div class="nav-item" data-page="verifikasi" onclick="navigate('verifikasi')"><i class="fa-solid fa-file-shield"></i> Verifikasi & Audit Mitra</div>
+
+        <div class="sidebar-section-label">Laporan & Resolusi</div>
+        <div class="nav-item" data-page="eskalasi" onclick="navigate('eskalasi')"><i class="fa-solid fa-arrow-trend-up"></i> Eskalasi Keluhan <span class="nav-badge" id="badge-eskalasi">1</span></div>
+        <div class="nav-item" data-page="sentimen" onclick="navigate('sentimen')"><i class="fa-solid fa-cloud"></i> Analisis Sentimen AI</div>
+        <div class="nav-item" data-page="sanksi" onclick="navigate('sanksi')"><i class="fa-solid fa-gavel"></i> Investigasi & Sanksi</div>
+        <div class="nav-item" data-page="risiko" onclick="navigate('risiko')"><i class="fa-solid fa-radiation"></i> Penilaian Risiko AI <span class="nav-badge purple" id="badge-risiko">0</span></div>
+        <div class="nav-item" data-page="manusia" onclick="navigate('manusia')"><i class="fa-solid fa-user-check"></i> Verifikasi Manusia <span class="nav-badge" id="badge-manusia">1</span></div>
+
+        <div class="sidebar-section-label">Manajemen Data</div>
+        <div class="nav-item" data-page="registrasi" onclick="navigate('registrasi')"><i class="fa-solid fa-user-plus"></i> Registrasi Vendor Baru</div>
+        <div class="nav-item" data-page="standar" onclick="navigate('standar')"><i class="fa-solid fa-database"></i> Bank Standar Gizi</div>
+    </div>
+
+    <div class="main-content">
+
+        <!-- ============ DASHBOARD UTAMA ============ -->
+        <div class="page active" id="page-dashboard">
+            <div class="page-header"><div><div class="page-title">Dashboard Utama</div><div class="page-sub">Monitoring nasional performa seluruh mitra SPPG program Makan Bergizi Gratis</div></div></div>
+
+            <div class="kpi-grid">
+                <div class="kpi-card"><div class="kpi-icon blue"><i class="fa-solid fa-store"></i></div><div><div class="kpi-val">1.842</div><div class="kpi-lbl">Vendor/SPPG Aktif</div></div></div>
+                <div class="kpi-card"><div class="kpi-icon green"><i class="fa-solid fa-bowl-food"></i></div><div><div class="kpi-val">2.4M</div><div class="kpi-lbl">Porsi Terdistribusi Hari Ini</div></div></div>
+                <div class="kpi-card"><div class="kpi-icon gold"><i class="fa-solid fa-triangle-exclamation"></i></div><div><div class="kpi-val">124</div><div class="kpi-lbl">Laporan Masuk Hari Ini</div></div></div>
+                <div class="kpi-card"><div class="kpi-icon red"><i class="fa-solid fa-ban"></i></div><div><div class="kpi-val">4</div><div class="kpi-lbl">Vendor Disuspend</div></div></div>
+            </div>
+
+            <div class="card">
+                <div class="section-title"><span><i class="fa-solid fa-inbox"></i> Antrean Validasi Calon Mitra Baru</span>
+                    <select class="filter-select"><option>Filter: Semua Tahap</option><option>Tahap 2 (Validasi Data)</option><option>Tahap 4 (Validasi Persiapan)</option></select>
+                </div>
+                <table>
+                    <tr><th>ID Pengajuan</th><th>Nama Calon Mitra</th><th>Tipe</th><th>Lokasi Pengajuan</th><th>Status Validasi</th><th>Aksi BGN</th></tr>
+                    <tr><td>REG-9912</td><td>PT Boga Sejahtera</td><td>Non-Yayasan</td><td>Jakarta Selatan</td><td><span class="pill gold"><i class="fa-solid fa-hourglass-half"></i> Tahap 4: Persiapan SPPG</span></td><td><button class="btn btn-outline btn-sm" onclick="reviewMitra('REG-9912')">Review Berkas</button></td></tr>
+                    <tr><td>REG-9915</td><td>Yayasan Peduli Anak</td><td>Yayasan</td><td>Kab. Bogor</td><td><span class="pill gold"><i class="fa-solid fa-hourglass-half"></i> Tahap 2: Validasi Legalitas</span></td><td><button class="btn btn-outline btn-sm" onclick="reviewMitra('REG-9915')">Review Berkas</button></td></tr>
+                    <tr><td>REG-9908</td><td>CV Dapur Rasa</td><td>Non-Yayasan</td><td>Surabaya</td><td><span class="pill green"><i class="fa-solid fa-check"></i> Tahap 4: Menunggu Survey</span></td><td><button class="btn btn-primary btn-sm" onclick="approveKelayakan('REG-9908')">Kelayakan SPPG</button></td></tr>
+                </table>
+            </div>
+
+            <div class="card">
+                <div class="section-title"><span><i class="fa-solid fa-clipboard-check"></i> Laporan Hasil Audit Bulan Ini</span>
+                    <div style="display:flex;gap:8px;"><select class="filter-select"><option>Semua Wilayah</option></select><select class="filter-select"><option>Status: Gagal</option><option>Status: Lulus</option></select></div>
+                </div>
+                <table>
+                    <tr><th>ID Vendor</th><th>Nama Dapur / SPPG</th><th>Tanggal Audit</th><th>Auditor</th><th>Skor Gizi & Higiene</th><th>Hasil</th><th>Aksi</th></tr>
+                    <tr><td>V-00456</td><td>UD Gizi Prima Bali</td><td>12 Juli 2026</td><td>BGN-Insp-04</td><td style="color:var(--danger);font-weight:700;">54 / 100 (Sangat Kurang)</td><td><span class="pill red">Gagal Uji</span></td><td><button class="btn btn-outline btn-sm">Lihat PDF</button></td></tr>
+                    <tr><td>V-08221</td><td>CV Makmur Jaya</td><td>10 Juli 2026</td><td>BGN-Insp-02</td><td style="color:var(--warning);font-weight:700;">68 / 100 (Cukup)</td><td><span class="pill gold">Perlu Perbaikan</span></td><td><button class="btn btn-outline btn-sm">Lihat PDF</button></td></tr>
+                    <tr><td>V-01190</td><td>Yayasan Sehat Bunda</td><td>8 Juli 2026</td><td>BGN-Insp-01</td><td style="color:var(--success);font-weight:700;">89 / 100 (Baik)</td><td><span class="pill green">Lulus</span></td><td><button class="btn btn-outline btn-sm">Lihat PDF</button></td></tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- ============ PETA SEBARAN ============ -->
+        <div class="page" id="page-peta">
+            <div class="page-header"><div><div class="page-title">Peta Sebaran</div><div class="page-sub">Jangkauan dan distribusi program Makan Bergizi Gratis di seluruh wilayah</div></div></div>
+            <div class="kpi-grid">
+                <div class="kpi-card"><div class="kpi-icon blue"><i class="fa-solid fa-map-pin"></i></div><div><div class="kpi-val">34</div><div class="kpi-lbl">Provinsi Terjangkau</div></div></div>
+                <div class="kpi-card"><div class="kpi-icon green"><i class="fa-solid fa-school"></i></div><div><div class="kpi-val">28.410</div><div class="kpi-lbl">Sekolah Penerima</div></div></div>
+                <div class="kpi-card"><div class="kpi-icon gold"><i class="fa-solid fa-child-reaching"></i></div><div><div class="kpi-val">6.1M</div><div class="kpi-lbl">Anak Penerima Manfaat</div></div></div>
+                <div class="kpi-card"><div class="kpi-icon red"><i class="fa-solid fa-triangle-exclamation"></i></div><div><div class="kpi-val">18</div><div class="kpi-lbl">Wilayah Status Waspada</div></div></div>
+            </div>
+            <div class="card">
+                <div class="section-title"><i class="fa-solid fa-earth-asia"></i> Sebaran Status Kepatuhan per Wilayah</div>
+                <div class="province-grid" id="province-grid"></div>
+            </div>
+        </div>
+
+        <!-- ============ VERIFIKASI & AUDIT MITRA ============ -->
+        <div class="page" id="page-verifikasi">
+            <div class="page-header"><div><div class="page-title">Verifikasi & Audit Mitra</div><div class="page-sub">Validasi kelengkapan data calon mitra dan penilaian hasil audit lapangan berbasis SOP resmi BGN</div></div></div>
+
+            <div class="card">
+                <div class="section-title"><span><i class="fa-solid fa-inbox"></i> Antrean Validasi Calon Mitra Baru</span><span class="pill blue">Tahap 2 (Validasi Data) & Tahap 4 (Validasi Persiapan SPPG)</span></div>
+                <table>
+                    <tr><th>ID Pengajuan</th><th>Nama Calon Mitra</th><th>Tipe</th><th>Lokasi Pengajuan</th><th>Status Validasi</th><th>Aksi BGN</th></tr>
+                    <tr><td>REG-9912</td><td>PT Boga Sejahtera</td><td>Non-Yayasan</td><td>Jakarta Selatan</td><td><span class="pill gold">Tahap 4: Persiapan SPPG</span></td><td><button class="btn btn-outline btn-sm" onclick="reviewMitra('REG-9912')">Review Berkas</button></td></tr>
+                    <tr><td>REG-9915</td><td>Yayasan Peduli Anak</td><td>Yayasan</td><td>Kab. Bogor</td><td><span class="pill gold">Tahap 2: Validasi Legalitas</span></td><td><button class="btn btn-outline btn-sm" onclick="reviewMitra('REG-9915')">Review Berkas</button></td></tr>
+                    <tr><td>REG-9908</td><td>CV Dapur Rasa</td><td>Non-Yayasan</td><td>Surabaya</td><td><span class="pill green">Tahap 4: Menunggu Survey</span></td><td><button class="btn btn-primary btn-sm" onclick="approveKelayakan('REG-9908')">Kelayakan SPPG</button></td></tr>
+                </table>
+            </div>
+
+            <div class="card">
+                <div class="section-title"><i class="fa-solid fa-clipboard-list"></i> Form Penilaian Audit Lapangan (SOP BGN)</div>
+                <div class="form-grid">
+                    <div class="form-group"><label>Vendor / SPPG</label><select class="form-control"><option>UD Gizi Prima Bali (V-00456)</option><option>CV Makmur Jaya (V-08221)</option></select></div>
+                    <div class="form-group"><label>Auditor Bertugas</label><input class="form-control" value="BGN-Insp-04"></div>
+                    <div class="form-group"><label>Skor Kebersihan Dapur (0-25)</label><input class="form-control" type="number" id="s1" value="12"></div>
+                    <div class="form-group"><label>Skor Kesesuaian Gizi (0-25)</label><input class="form-control" type="number" id="s2" value="15"></div>
+                    <div class="form-group"><label>Skor Penyimpanan Bahan (0-25)</label><input class="form-control" type="number" id="s3" value="14"></div>
+                    <div class="form-group"><label>Skor SOP & Dokumentasi (0-25)</label><input class="form-control" type="number" id="s4" value="13"></div>
+                </div>
+                <button class="btn btn-primary" onclick="calcAuditScore()"><i class="fa-solid fa-calculator"></i> Hitung & Simpan Skor Audit</button>
+                <div id="audit-result" style="margin-top:12px;"></div>
+            </div>
+
+            <div class="card">
+                <div class="section-title"><i class="fa-solid fa-clipboard-check"></i> Laporan Hasil Audit Bulan Ini</div>
+                <table id="audit-table">
+                    <tr><th>ID Vendor</th><th>Nama Dapur / SPPG</th><th>Tanggal Audit</th><th>Skor</th><th>Hasil</th><th>Aksi</th></tr>
+                    <tr><td>V-00456</td><td>UD Gizi Prima Bali</td><td>12 Jul 2026</td><td>54 / 100</td><td><span class="pill red">Gagal Uji</span></td><td><button class="btn btn-outline btn-sm">Lihat PDF</button></td></tr>
+                    <tr><td>V-08221</td><td>CV Makmur Jaya</td><td>10 Jul 2026</td><td>68 / 100</td><td><span class="pill gold">Perlu Perbaikan</span></td><td><button class="btn btn-outline btn-sm">Lihat PDF</button></td></tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- ============ ESKALASI KELUHAN ============ -->
+        <div class="page" id="page-eskalasi">
+            <div class="page-header"><div><div class="page-title">Eskalasi Keluhan</div><div class="page-sub">Tren keluhan teratas di masing-masing SPPG untuk mengetahui akar masalah operasional</div></div></div>
+            <div class="two-col">
+                <div class="card">
+                    <div class="section-title"><i class="fa-solid fa-chart-bar"></i> Kategori Keluhan Terbanyak (30 Hari)</div>
+                    <div class="escalation-bar-row"><div class="escalation-label">Keamanan Pangan & Kesehatan</div><div class="escalation-track"><div class="escalation-fill" style="width:88%"></div></div><div class="escalation-count">42</div></div>
+                    <div class="escalation-bar-row"><div class="escalation-label">Logistik & Distribusi (Terlambat)</div><div class="escalation-track"><div class="escalation-fill" style="width:60%;background:var(--warning)"></div></div><div class="escalation-count">29</div></div>
+                    <div class="escalation-bar-row"><div class="escalation-label">Kualitas Makanan (Porsi Kurang)</div><div class="escalation-track"><div class="escalation-fill" style="width:45%;background:var(--accent)"></div></div><div class="escalation-count">21</div></div>
+                    <div class="escalation-bar-row"><div class="escalation-label">Kemasan Rusak</div><div class="escalation-track"><div class="escalation-fill" style="width:20%;background:var(--text-muted)"></div></div><div class="escalation-count">9</div></div>
+                </div>
+                <div class="card">
+                    <div class="section-title"><i class="fa-solid fa-ranking-star"></i> SPPG dengan Eskalasi Tertinggi</div>
+                    <table>
+                        <tr><th>Vendor</th><th>Total Keluhan</th><th>Urgensi</th></tr>
+                        <tr><td>UD Gizi Prima Bali</td><td>14</td><td><span class="pill red">Kritis</span></td></tr>
+                        <tr><td>CV Makmur Jaya</td><td>8</td><td><span class="pill gold">Sedang</span></td></tr>
+                        <tr><td>Yayasan Sehat Bunda</td><td>3</td><td><span class="pill blue">Rendah</span></td></tr>
+                    </table>
+                </div>
+            </div>
+            <div class="card">
+                <div class="section-title"><i class="fa-solid fa-inbox"></i> Daftar Laporan Perlu Eskalasi</div>
+                <div id="eskalasi-list"></div>
+            </div>
+        </div>
+
+        <!-- ============ ANALISIS SENTIMEN AI ============ -->
+        <div class="page" id="page-sentimen">
+            <div class="page-header"><div><div class="page-title">Analisis Sentimen AI</div><div class="page-sub">Pemrosesan bahasa alami (NLP) atas seluruh ulasan penerima</div></div></div>
+            <div class="two-col">
+                <div class="card">
+                    <div class="section-title"><i class="fa-solid fa-cloud"></i> Word Cloud Sentimen Negatif Terbanyak</div>
+                    <div class="wordcloud-box" id="wc-negative"></div>
+                </div>
+                <div class="card">
+                    <div class="section-title"><i class="fa-solid fa-cloud"></i> Word Cloud Sentimen Positif</div>
+                    <div class="wordcloud-box" id="wc-positive"></div>
+                </div>
+            </div>
+            <div class="card">
+                <p style="font-size:12px;color:var(--text-muted);"><i class="fa-solid fa-circle-info"></i> Semakin besar sebuah kata, semakin sering kata tersebut disebut oleh penerima dalam laporan yang telah disubmit. Dihitung otomatis dari data laporan real-time.</p>
+            </div>
+        </div>
+
+        <!-- ============ INVESTIGASI & SANKSI ============ -->
+        <div class="page" id="page-sanksi">
+            <div class="page-header"><div><div class="page-title">Investigasi & Sanksi</div><div class="page-sub">Penindakan tegas untuk pelanggaran operasional MBG</div></div></div>
+            <div class="kpi-grid">
+                <div class="kpi-card"><div class="kpi-icon red"><i class="fa-solid fa-ban"></i></div><div><div class="kpi-val">4</div><div class="kpi-lbl">Vendor Disuspend (Aktif)</div><div class="kpi-note" style="color:var(--danger)">Seluruh pembayaran dibekukan</div></div></div>
+                <div class="kpi-card"><div class="kpi-icon gold"><i class="fa-solid fa-magnifying-glass"></i></div><div><div class="kpi-val">12</div><div class="kpi-lbl">Dalam Investigasi</div><div class="kpi-note" style="color:var(--warning)">Kasus sedang didalami auditor</div></div></div>
+                <div class="kpi-card"><div class="kpi-icon blue"><i class="fa-solid fa-circle-check"></i></div><div><div class="kpi-val">2</div><div class="kpi-lbl">Sanksi Dicabut Bulan Ini</div><div class="kpi-note" style="color:var(--success)">Telah memenuhi perbaikan standar</div></div></div>
+            </div>
+            <div class="card">
+                <div class="section-title"><i class="fa-solid fa-scale-balanced"></i> Daftar Sanksi Aktif</div>
+                <table>
+                    <tr><th>ID Kasus</th><th>Vendor Terlapor</th><th>Tingkat Pelanggaran</th><th>Sanksi Diberikan</th><th>Tgl Berlaku</th><th>Aksi</th></tr>
+                    <tr><td>INV-2025-089</td><td>UD Gizi Prima Bali (V-00456)</td><td style="color:var(--danger);font-weight:700;">Berat (Keracunan Massal)</td><td><span class="pill red">SUSPEND DISTRIBUSI 30 HARI</span></td><td>18 Jul 2026</td><td><button class="btn btn-outline btn-sm" onclick="viewBeritaAcara('INV-2025-089')">Berita Acara</button></td></tr>
+                    <tr><td>INV-2025-072</td><td>CV Makmur Jaya (V-08221)</td><td style="color:var(--warning);font-weight:700;">Sedang (Manipulasi Gramasi Porsi)</td><td><span class="pill gold">DENDA & SP 2</span></td><td>10 Jul 2026</td><td><button class="btn btn-outline btn-sm" onclick="viewBeritaAcara('INV-2025-072')">Berita Acara</button></td></tr>
+                </table>
+            </div>
+            <div class="card">
+                <div class="section-title"><i class="fa-solid fa-gavel"></i> Jatuhkan Sanksi Baru</div>
+                <div class="form-grid">
+                    <div class="form-group"><label>Vendor Terlapor</label><select class="form-control" id="sanction-vendor"><option>UD Gizi Prima Bali (V-00456)</option><option>CV Makmur Jaya (V-08221)</option><option>Yayasan Sehat Bunda (V-01190)</option></select></div>
+                    <div class="form-group"><label>Tingkat Pelanggaran</label><select class="form-control" id="sanction-level"><option>Ringan</option><option>Sedang</option><option selected>Berat</option></select></div>
+                    <div class="form-group"><label>Jenis Sanksi</label><select class="form-control" id="sanction-type"><option>Surat Peringatan (SP)</option><option>Denda</option><option>Suspend Distribusi</option><option>Pencabutan Status Mitra</option></select></div>
+                    <div class="form-group"><label>Durasi (Hari, jika suspend)</label><input class="form-control" type="number" id="sanction-days" value="30"></div>
+                </div>
+                <button class="btn btn-danger" onclick="issueSanction()"><i class="fa-solid fa-gavel"></i> Terbitkan Sanksi</button>
+            </div>
+        </div>
+
+        <!-- ============ PENILAIAN RISIKO AI ============ -->
+        <div class="page" id="page-risiko">
+            <div class="page-header"><div><div class="page-title">Penilaian Risiko AI</div><div class="page-sub">Rekomendasi status kelayakan SPPG berdasarkan skor risiko gabungan AI</div></div></div>
+            <div class="card">
+                <div class="section-title"><i class="fa-solid fa-radiation"></i> Peringkat Risiko Vendor</div>
+                <div id="risk-list"></div>
+            </div>
+        </div>
+
+        <!-- ============ VERIFIKASI MANUSIA ============ -->
+        <div class="page" id="page-manusia">
+            <div class="page-header"><div><div class="page-title">Verifikasi Manusia</div><div class="page-sub">Antrean kasus yang memerlukan tinjauan manual sebelum keputusan AI dieksekusi</div></div></div>
+            <div class="card">
+                <div class="section-title"><i class="fa-solid fa-user-check"></i> Kasus Menunggu Tinjauan Manual</div>
+                <table>
+                    <tr><th>ID Laporan</th><th>Vendor</th><th>Rekomendasi AI</th><th>Alasan Perlu Verifikasi</th><th>Aksi</th></tr>
+                    <tr><td>RPT-2026-06-0892</td><td>UD Gizi Prima Bali</td><td><span class="pill red">Suspend Otomatis</span></td><td>Kata kunci kritis "basi" terdeteksi 96% confidence — dampak luas ke reputasi vendor</td>
+                        <td><button class="btn btn-primary btn-sm" onclick="confirmVerification()">Setujui</button> <button class="btn btn-outline btn-sm" onclick="rejectVerification()">Tolak</button></td></tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- ============ REGISTRASI VENDOR BARU ============ -->
+        <div class="page" id="page-registrasi">
+            <div class="page-header"><div><div class="page-title">Registrasi Vendor Baru</div><div class="page-sub">Daftarkan calon mitra SPPG baru ke dalam sistem SMART-MBG</div></div></div>
+            <div class="card">
+                <div class="form-grid">
+                    <div class="form-group"><label>Nama Badan Usaha / Yayasan</label><input class="form-control" placeholder="cth. CV Dapur Sehat Nusantara"></div>
+                    <div class="form-group"><label>Tipe Mitra</label><select class="form-control"><option>Non-Yayasan (CV/PT)</option><option>Yayasan</option></select></div>
+                    <div class="form-group"><label>Lokasi / Wilayah Operasional</label><input class="form-control" placeholder="cth. Denpasar, Bali"></div>
+                    <div class="form-group"><label>Nomor Induk Berusaha (NIB)</label><input class="form-control" placeholder="cth. 0123456789012"></div>
+                    <div class="form-group"><label>Penanggung Jawab</label><input class="form-control" placeholder="Nama lengkap PIC"></div>
+                    <div class="form-group"><label>Nomor Kontak</label><input class="form-control" placeholder="08xx-xxxx-xxxx"></div>
+                </div>
+                <button class="btn btn-primary" onclick="registerVendor()"><i class="fa-solid fa-user-plus"></i> Daftarkan Calon Mitra</button>
+            </div>
+        </div>
+
+        <!-- ============ BANK STANDAR GIZI ============ -->
+        <div class="page" id="page-standar">
+            <div class="page-header"><div><div class="page-title">Bank Standar Gizi</div><div class="page-sub">Kamus resmi bahan makanan, kandungan gizi, dan penanda alergen nasional BGN</div></div></div>
+            <div class="card">
+                <div class="section-title"><i class="fa-solid fa-database"></i> Kamus Bahan Makanan Resmi</div>
+                <table>
+                    <tr><th>Nama Bahan</th><th>Kalori (kcal)</th><th>Protein (g)</th><th>Lemak (g)</th><th>Penanda Alergen</th></tr>
+                    <tr><td>Nasi Putih</td><td>180</td><td>3</td><td>0.3</td><td><span class="pill gray">Tidak Ada</span></td></tr>
+                    <tr><td>Ayam Goreng</td><td>220</td><td>18</td><td>14</td><td><span class="pill gray">Tidak Ada</span></td></tr>
+                    <tr><td>Saus Bumbu Kacang</td><td>90</td><td>3</td><td>7</td><td><span class="pill red">Alergi Kacang</span></td></tr>
+                    <tr><td>Tahu Goreng</td><td>80</td><td>6</td><td>5</td><td><span class="pill gray">Tidak Ada</span></td></tr>
+                    <tr><td>Kecap Manis Kedelai</td><td>20</td><td>1</td><td>0</td><td><span class="pill gray">Tidak Ada</span></td></tr>
+                    <tr><td>Udang Goreng Tepung</td><td>150</td><td>12</td><td>8</td><td><span class="pill red">Alergi Seafood</span></td></tr>
+                    <tr><td>Telur Dadar</td><td>140</td><td>10</td><td>10</td><td><span class="pill red">Alergi Telur</span></td></tr>
+                    <tr><td>Susu UHT</td><td>120</td><td>6</td><td>5</td><td><span class="pill gold">Intoleransi Laktosa</span></td></tr>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="modal-overlay" id="detail-modal">
+    <div class="modal-box">
+        <div class="modal-head">
+            <h3 id="modal-title"><i class="fa-solid fa-file-lines"></i> Detail</h3>
+            <button class="modal-close" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="modal-body" id="modal-body"></div>
+    </div>
+</div>
+
+<div class="toast" id="toast"><i id="toast-icon" class="fa-solid fa-circle-check"></i><span id="toast-msg"></span></div>
+
+<script>
+function getDB(){ return (typeof SmartMBG !== 'undefined' && SmartMBG.DB) ? SmartMBG.DB : null; }
+
+function navigate(page){
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    document.getElementById('page-'+page).classList.add('active');
+    document.querySelector('.nav-item[data-page="'+page+'"]').classList.add('active');
+    document.querySelectorAll('.dropdown').forEach(d=>d.classList.remove('show'));
+    if(page==='sentimen') renderWordCloud();
+    if(page==='eskalasi') renderEskalasiList();
+    if(page==='risiko') renderRiskList();
+    if(page==='peta') renderProvinceGrid();
+}
+function toggleDropdown(id){
+    document.querySelectorAll('.dropdown').forEach(d=>{ if(d.id!==id) d.classList.remove('show'); });
+    document.getElementById(id).classList.toggle('show');
+}
+document.addEventListener('click', function(e){
+    if(!e.target.closest('.topbar-actions')){ document.querySelectorAll('.dropdown').forEach(d=>d.classList.remove('show')); }
+});
+function closeModal(){ document.getElementById('detail-modal').classList.remove('show'); }
+function showToast(msg,type){
+    const toast=document.getElementById('toast'), icon=document.getElementById('toast-icon'), m=document.getElementById('toast-msg');
+    toast.className='show '+(type||'success');
+    icon.className = type==='success' ? 'fa-solid fa-circle-check' : type==='error' ? 'fa-solid fa-circle-xmark' : 'fa-solid fa-circle-info';
+    m.textContent=msg;
+    clearTimeout(window._t); window._t=setTimeout(()=>toast.classList.remove('show'),3000);
+}
+function openModal(title, bodyHtml){
+    document.getElementById('modal-title').innerHTML = title;
+    document.getElementById('modal-body').innerHTML = bodyHtml;
+    document.getElementById('detail-modal').classList.add('show');
+}
+
+// ── VERIFIKASI & AUDIT MITRA ──
+function reviewMitra(id){
+    openModal(`<i class="fa-solid fa-file-shield"></i> Review Berkas ${id}`, `
+        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:14px;">Meninjau kelengkapan dokumen legalitas, NIB, dan foto persiapan dapur calon mitra.</p>
+        <div class="form-group"><label>Catatan Verifikator</label><textarea class="form-control" placeholder="Tulis catatan verifikasi..."></textarea></div>
+        <button class="btn btn-primary" onclick="closeModal(); showToast('Berkas ${id} disetujui, lanjut ke tahap berikutnya.','success');">Setujui & Lanjutkan Tahap</button>
+        <button class="btn btn-outline" onclick="closeModal(); showToast('Berkas ${id} dikembalikan untuk revisi.','info');">Minta Revisi</button>
+    `);
+}
+function approveKelayakan(id){
+    openModal(`<i class="fa-solid fa-clipboard-check"></i> Kelayakan SPPG ${id}`, `
+        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:14px;">Jadwalkan Survey Lapangan (Tahap 05) untuk calon mitra ini.</p>
+        <div class="form-group"><label>Tanggal Survey</label><input type="date" class="form-control"></div>
+        <div class="form-group"><label>Petugas Survey</label><input class="form-control" placeholder="Nama petugas BGN"></div>
+        <button class="btn btn-primary" onclick="closeModal(); showToast('Survey lapangan untuk ${id} berhasil dijadwalkan.','success');">Jadwalkan Survey</button>
+    `);
+}
+function calcAuditScore(){
+    const s1=+document.getElementById('s1').value||0, s2=+document.getElementById('s2').value||0, s3=+document.getElementById('s3').value||0, s4=+document.getElementById('s4').value||0;
+    const total=s1+s2+s3+s4;
+    const hasil = total<60 ? {label:'Gagal Uji',pill:'red'} : total<80 ? {label:'Perlu Perbaikan',pill:'gold'} : {label:'Lulus',pill:'green'};
+    document.getElementById('audit-result').innerHTML = `<div class="card" style="background:${total<60?'var(--danger-light)':total<80?'var(--warning-light)':'var(--success-light)'};margin:0;">
+        <strong style="font-size:20px;font-family:'Plus Jakarta Sans',sans-serif;">${total} / 100</strong> — <span class="pill ${hasil.pill}">${hasil.label}</span>
+    </div>`;
+    showToast('Skor audit tersimpan: '+total+'/100 ('+hasil.label+')','success');
+}
+
+// ── ESKALASI KELUHAN (from swarasa_complaints) ──
+async function renderEskalasiList(){
+    const DB=getDB();
+    let complaints = DB ? await DB.getAllComplaints() : JSON.parse(localStorage.getItem('swarasa_complaints')||'[]');
+    const kritis = complaints.filter(c=>c.urgency==='Kritis'||c.urgency==='Tinggi');
+    document.getElementById('badge-eskalasi').textContent = kritis.length;
+    const el=document.getElementById('eskalasi-list');
+    if(complaints.length===0){ el.innerHTML='<div class="empty-state"><i class="fa-solid fa-inbox"></i><div>Belum ada laporan masuk.</div></div>'; return; }
+    el.innerHTML = complaints.map(c=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);">
+            <div>
+                <strong style="font-size:13px;">${c.title||c.category}</strong>
+                <div style="font-size:11.5px;color:var(--text-muted)">${c.id} · ${c.vendorName||'-'} · ${c.schoolName||'-'} · ${c.date}</div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;">
+                <span class="pill ${c.urgency==='Kritis'?'red':c.urgency==='Tinggi'?'gold':'blue'}">${c.urgency}</span>
+                <button class="btn btn-outline btn-sm" onclick="escalateCase('${c.id}')">Eskalasi</button>
+            </div>
+        </div>`).join('');
+}
+function escalateCase(id){ showToast('Kasus '+id+' dieskalasi ke tim Investigasi & Sanksi.','info'); }
+
+// ── SENTIMEN AI WORDCLOUD ──
+async function renderWordCloud(){
+    const DB=getDB();
+    let complaints = DB ? await DB.getAllComplaints() : JSON.parse(localStorage.getItem('swarasa_complaints')||'[]');
+    const stopwords=new Set(['yang','dan','di','ke','dari','ini','itu','saya','anak','anak-anak','tidak','sudah','untuk','dengan','sangat','agak','sedikit','ada']);
+    const posWords=['enak','kenyang','suka','bersih','segar','lezat','hangat','tepat'];
+    const negWords=['basi','sedikit','telat','hambar','bau','keras','busuk','kurang','dingin','rusak'];
+    let posFreq={}, negFreq={};
+    complaints.forEach(c=>{
+        const text=(c.desc||'').toLowerCase();
+        const tokens=text.replace(/[.,!?"]/g,'').split(/\s+/);
+        tokens.forEach(w=>{
+            if(!w || stopwords.has(w)) return;
+            if(posWords.some(p=>w.includes(p))) posFreq[w]=(posFreq[w]||0)+1;
+            if(negWords.some(n=>w.includes(n))) negFreq[w]=(negFreq[w]||0)+1;
+        });
+    });
+    // fallback defaults so the cloud never looks empty in a fresh demo
+    const defaultNeg={basi:12,sedikit:9,telat:8,hambar:5,bau:5,keras:3};
+    const defaultPos={enak:14,kenyang:9,suka:8,bersih:5,'tepat waktu':4};
+    if(Object.keys(negFreq).length===0) negFreq=defaultNeg;
+    if(Object.keys(posFreq).length===0) posFreq=defaultPos;
+    renderCloud('wc-negative', negFreq, ['#D32F2F','#e8621b','#F9A825','#94a3b8']);
+    renderCloud('wc-positive', posFreq, ['#16a34a','#0d9e75','#65a30d','#94a3b8']);
+}
+function renderCloud(elId, freq, colors){
+    const entries=Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,12);
+    const max=Math.max(...entries.map(e=>e[1]),1);
+    const el=document.getElementById(elId);
+    el.innerHTML = entries.map(([word,count],i)=>{
+        const size = 14 + (count/max)*34;
+        const color = colors[i % colors.length];
+        return `<span style="font-size:${size}px;color:${color};">${word}</span>`;
+    }).join('');
+}
+
+// ── PROVINCE GRID (Peta Sebaran) ──
+const provinces=[
+    {n:'Bali',c:412,s:'kritis'},{n:'DKI Jakarta',c:2140,s:'waspada'},{n:'Jawa Barat',c:3980,s:'baik'},
+    {n:'Jawa Timur',c:3210,s:'baik'},{n:'Sumatera Utara',c:1560,s:'waspada'},{n:'Sulawesi Selatan',c:980,s:'baik'},
+    {n:'Kalimantan Timur',c:640,s:'baik'},{n:'Banten',c:1420,s:'waspada'},{n:'Yogyakarta',c:510,s:'baik'},
+    {n:'Papua',c:210,s:'kritis'},{n:'NTB',c:390,s:'waspada'},{n:'Sumatera Selatan',c:870,s:'baik'}
+];
+function renderProvinceGrid(){
+    document.getElementById('province-grid').innerHTML = provinces.map(p=>`
+        <div class="province-card status-${p.s}">
+            <div class="province-name">${p.n}</div>
+            <div class="province-meta">${p.c} sekolah penerima</div>
+            <div class="province-count">${p.c.toLocaleString('id-ID')}</div>
+            <span class="pill ${p.s==='baik'?'green':p.s==='waspada'?'gold':'red'}" style="margin-top:8px;">${p.s==='baik'?'Baik':p.s==='waspada'?'Waspada':'Kritis'}</span>
+        </div>`).join('');
+}
+
+// ── INVESTIGASI & SANKSI ──
+function viewBeritaAcara(id){
+    openModal(`<i class="fa-solid fa-file-signature"></i> Berita Acara ${id}`, `
+        <p style="font-size:13px;color:var(--text-secondary);line-height:1.7;">Dokumen resmi berisi kronologi pelanggaran, bukti pendukung (laporan penerima, hasil audit), dan keputusan sanksi yang dijatuhkan oleh Badan Gizi Nasional terhadap vendor terlapor kasus <strong>${id}</strong>.</p>
+        <button class="btn btn-primary" style="margin-top:14px;" onclick="closeModal(); showToast('Berita acara ${id} diunduh.','success');"><i class="fa-solid fa-download"></i> Unduh PDF</button>
+    `);
+}
+async function issueSanction(){
+    const vendor=document.getElementById('sanction-vendor').value;
+    const level=document.getElementById('sanction-level').value;
+    const type=document.getElementById('sanction-type').value;
+    showToast('Sanksi "'+type+'" ('+level+') diterbitkan untuk '+vendor+'.','success');
+    if(type==='Suspend Distribusi'){
+        const DB = getDB();
+        if(DB){
+            await DB.updateVendorInfo('status', 'soft-suspend');
+            await DB.updateVendorInfo('score', '40');
+        } else {
+            localStorage.setItem('swarasa_vendor_status','soft-suspend');
+            localStorage.setItem('swarasa_vendor_score','40');
+        }
+    }
+}
+
+// ── PENILAIAN RISIKO AI ──
+const riskVendors=[
+    {name:'UD Gizi Prima Bali',id:'V-00456',score:88,status:'Kritis'},
+    {name:'CV Makmur Jaya',id:'V-08221',score:56,status:'Waspada'},
+    {name:'Yayasan Sehat Bunda',id:'V-01190',score:14,status:'Baik'},
+    {name:'CV Dapur Rasa',id:'V-07742',score:32,status:'Baik'},
+    {name:'PT Boga Sejahtera',id:'V-06120',score:61,status:'Waspada'}
+];
+function renderRiskList(){
+    document.getElementById('badge-risiko').textContent = riskVendors.filter(v=>v.status==='Kritis').length;
+    document.getElementById('risk-list').innerHTML = riskVendors.sort((a,b)=>b.score-a.score).map(v=>{
+        const color = v.status==='Kritis' ? 'var(--danger)' : v.status==='Waspada' ? 'var(--warning)' : 'var(--success)';
+        const pillClass = v.status==='Kritis' ? 'red' : v.status==='Waspada' ? 'gold' : 'green';
+        return `<div class="risk-item">
+            <div class="risk-gauge" style="background:${color}">${v.score}</div>
+            <div class="risk-info"><div class="risk-name">${v.name}</div><div class="risk-sub">${v.id} · Skor Risiko Gabungan AI</div></div>
+            <span class="pill ${pillClass}">${v.status}</span>
+        </div>`;
+    }).join('');
+}
+
+// ── VERIFIKASI MANUSIA ──
+function confirmVerification(){
+    document.getElementById('badge-manusia').textContent='0';
+    document.getElementById('badge-manusia').style.display='none';
+    showToast('Rekomendasi AI dikonfirmasi. Sanksi suspend diberlakukan.','success');
+}
+function rejectVerification(){
+    document.getElementById('badge-manusia').textContent='0';
+    document.getElementById('badge-manusia').style.display='none';
+    showToast('Rekomendasi AI ditolak. Kasus dikembalikan untuk investigasi manual.','info');
+}
+
+// ── REGISTRASI VENDOR ──
+function registerVendor(){
+    showToast('Calon mitra baru berhasil didaftarkan dan masuk Tahap 01: Pendaftaran.','success');
+}
+
+// ── INIT ──
+document.addEventListener('DOMContentLoaded', function(){
+    renderProvinceGrid();
+    renderEskalasiList();
+});
+</script>
+</body>
+</html>

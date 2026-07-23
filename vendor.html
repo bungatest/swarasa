@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SWARASA VENDOR — AI Prevention & Compliance Gateway</title>
+<link rel="icon" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="db.js"></script>
+<style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    :root{
+        --teal:#0d9e75; --teal-light:#e1f5ee; --teal-mid:#1db98a; --teal-dark:#0a7a5c;
+        --orange:#e8621b; --orange-light:#fdece0;
+        --danger:#D32F2F; --danger-light:#FFEBEE;
+        --warning:#F57F17; --warning-light:#FFFDE7;
+        --success:#2E7D32; --success-light:#E8F5E9;
+        --text-primary:#111827; --text-secondary:#6B7280; --text-muted:#9CA3AF;
+        --bg-page:#F3F6FA; --bg-white:#ffffff;
+        --border:#E5E7EB; --border-mid:#D1D5DB;
+        --sidebar-w:230px; --header-h:56px;
+        --radius-sm:6px; --radius-md:10px; --radius-lg:14px; --radius-xl:20px;
+        --shadow-sm:0 1px 3px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.04);
+        --shadow-md:0 4px 12px rgba(0,0,0,.08),0 2px 4px rgba(0,0,0,.04);
+        --transition:180ms ease;
+    }
+    body{font-family:'DM Sans',sans-serif;background:var(--bg-page);color:var(--text-primary);min-height:100vh;font-size:14px;line-height:1.5;}
+    a{text-decoration:none;color:inherit;}
+
+    /* TOPBAR */
+    .topbar{position:fixed;top:0;left:0;right:0;z-index:200;height:var(--header-h);background:var(--teal);display:flex;align-items:center;padding:0 20px;gap:12px;}
+    .topbar-brand{display:flex;align-items:center;gap:10px;min-width:var(--sidebar-w);}
+    .brand-icon{width:32px;height:32px;border-radius:var(--radius-sm);background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;}
+    .brand-icon i{color:#fff;font-size:16px;}
+    .brand-name{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15px;color:#fff;letter-spacing:-0.2px;}
+    .brand-sub{font-size:10px;color:rgba(255,255,255,.7);font-weight:400;}
+    .topbar-location{flex:1;display:flex;align-items:center;justify-content:center;}
+    .location-pill{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:5px 14px;display:flex;align-items:center;gap:6px;color:#fff;font-size:12px;font-weight:600;}
+    .location-pill i{font-size:12px;opacity:.85;}
+    .topbar-actions{display:flex;align-items:center;gap:8px;position:relative;}
+    .topbar-btn{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.15);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;position:relative;transition:background var(--transition);}
+    .topbar-btn:hover{background:rgba(255,255,255,.28);}
+    .topbar-btn i{font-size:16px;}
+    .badge-notif{position:absolute;top:2px;right:2px;width:16px;height:16px;border-radius:50%;background:#ff9800;color:#3d1f00;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid var(--teal);}
+    .avatar-btn{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.25);border:2px solid rgba(255,255,255,.4);color:#fff;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+
+    .dropdown{position:absolute;top:calc(var(--header-h) + 10px);right:20px;background:#fff;border:1px solid var(--border);border-radius:var(--radius-md);width:230px;box-shadow:var(--shadow-md);z-index:1000;display:none;flex-direction:column;overflow:hidden;}
+    .dropdown.show{display:flex;animation:slideDown .2s ease;}
+    @keyframes slideDown{from{opacity:0;transform:translateY(-10px);}to{opacity:1;transform:translateY(0);}}
+    .dropdown-header{padding:14px 16px;border-bottom:1px solid var(--border);background:var(--bg-page);}
+    .dropdown-name{font-weight:700;font-size:13px;}
+    .dropdown-role{font-size:11px;color:var(--text-secondary);margin-top:2px;}
+    .dropdown-item{padding:11px 16px;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-secondary);cursor:pointer;border-bottom:1px solid var(--border);}
+    .dropdown-item:last-child{border-bottom:none;}
+    .dropdown-item:hover{background:var(--bg-page);color:var(--text-primary);}
+    .dropdown-item i{width:16px;text-align:center;}
+    .dropdown-item.text-danger{color:var(--danger);}
+
+    /* LAYOUT */
+    .app-layout{display:flex;padding-top:var(--header-h);min-height:100vh;align-items:flex-start;}
+    .sidebar{width:var(--sidebar-w);background:#fff;border-right:1px solid var(--border);position:fixed;top:var(--header-h);left:0;bottom:0;overflow-y:auto;z-index:100;display:flex;flex-direction:column;padding:16px 0;height:calc(100vh - var(--header-h));}
+    .sidebar-section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);padding:0 16px 6px;margin-top:14px;}
+    .sidebar-section-label:first-child{margin-top:0;}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;transition:background var(--transition),color var(--transition);color:var(--text-secondary);font-size:13.5px;font-weight:500;position:relative;}
+    .nav-item:hover{background:var(--bg-page);color:var(--text-primary);}
+    .nav-item.active{background:var(--teal-light);color:var(--teal-dark);border-right:3px solid var(--teal);font-weight:600;}
+    .nav-item i{font-size:16px;width:18px;text-align:center;flex-shrink:0;}
+    .nav-badge{margin-left:auto;background:var(--danger);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:10px;}
+    .sidebar-bottom{margin-top:auto;padding:14px 16px;border-top:1px solid var(--border);}
+    .score-card{background:var(--teal-light);border-radius:var(--radius-md);padding:12px;}
+    .score-card p{font-size:11px;color:var(--text-secondary);margin-bottom:4px;}
+    .score-val{font-size:16px;font-weight:800;color:var(--teal-dark);display:flex;align-items:center;gap:6px;font-family:'Plus Jakarta Sans',sans-serif;}
+    .score-val.warn{color:var(--warning);}
+    .score-val.danger{color:var(--danger);}
+
+    .main-content{margin-left:var(--sidebar-w);flex:1;padding:24px;width:calc(100% - var(--sidebar-w));}
+    .page{display:none;}
+    .page.active{display:block;padding-bottom:32px;}
+    .page-header{margin-bottom:20px;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+    .page-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:22px;font-weight:800;letter-spacing:-.4px;margin-bottom:2px;}
+    .page-sub{font-size:13px;color:var(--text-secondary);}
+
+    .btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;border:none;cursor:pointer;transition:filter var(--transition);}
+    .btn:hover{filter:brightness(0.95);}
+    .btn-primary{background:var(--teal);color:#fff;}
+    .btn-outline{background:#fff;border:1px solid var(--border-mid);color:var(--text-primary);}
+    .btn-sm{padding:6px 11px;font-size:12px;}
+    .btn-danger{background:var(--danger);color:#fff;}
+
+    /* CARDS */
+    .card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-md);padding:18px 20px;margin-bottom:20px;}
+    .section-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:14.5px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+    .section-title i{color:var(--teal);}
+
+    /* TRACKER */
+    .tracker-status-badge{display:inline-flex;align-items:center;gap:5px;background:#FFF8E1;color:#E65100;border:1px solid #FFCC02;border-radius:20px;padding:3px 11px;font-size:11px;font-weight:700;}
+    .tracker-steps{display:flex;align-items:center;gap:0;margin-top:18px;}
+    .tracker-step{display:flex;flex-direction:column;align-items:center;flex:1;}
+    .step-circle{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;border:2px solid;transition:all var(--transition);}
+    .step-circle.done{background:var(--teal);border-color:var(--teal);color:#fff;}
+    .step-circle.active{background:#ff6d00;border-color:#ff6d00;color:#fff;box-shadow:0 0 0 4px #ffe0b2;}
+    .step-circle.pending{background:#fff;border-color:var(--border-mid);color:var(--text-muted);}
+    .step-label{font-size:10.5px;color:var(--text-secondary);margin-top:7px;text-align:center;max-width:80px;}
+    .step-label.active-lbl{color:#ff6d00;font-weight:700;}
+    .step-connector{flex:1;height:2px;background:var(--border);align-self:center;margin-bottom:22px;}
+    .step-connector.done{background:var(--teal);}
+    .status-box{background:#FFFDE7;border:1px solid #FFE082;border-radius:var(--radius-md);padding:14px 16px;margin-top:18px;display:flex;gap:12px;}
+    .status-box i{color:#E65100;font-size:18px;margin-top:2px;}
+    .status-box strong{display:block;color:#E65100;font-size:13px;margin-bottom:3px;}
+    .status-box p{font-size:12.5px;color:#7a5200;line-height:1.5;}
+
+    .lock-label{font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:6px;margin:22px 0 12px;}
+    .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+    .kpi-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;display:flex;align-items:center;gap:14px;}
+    .kpi-icon{width:42px;height:42px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .kpi-icon i{font-size:18px;}
+    .kpi-icon.teal{background:var(--teal-light);} .kpi-icon.teal i{color:var(--teal-dark);}
+    .kpi-icon.blue{background:#e3eeff;} .kpi-icon.blue i{color:#1565C0;}
+    .kpi-icon.gold{background:#FFF8E1;} .kpi-icon.gold i{color:#E65100;}
+    .kpi-icon.red{background:var(--danger-light);} .kpi-icon.red i{color:var(--danger);}
+    .kpi-val{font-family:'Plus Jakarta Sans',sans-serif;font-size:24px;font-weight:800;line-height:1;}
+    .kpi-lbl{font-size:12px;color:var(--text-secondary);margin-top:2px;}
+
+    table{width:100%;border-collapse:collapse;font-size:13px;}
+    th{text-align:left;padding:10px 12px;color:var(--text-muted);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--border);}
+    td{padding:12px;border-bottom:1px solid var(--border);vertical-align:middle;}
+    tr:last-child td{border-bottom:none;}
+    .pill{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+    .pill.green{background:var(--success-light);color:var(--success);}
+    .pill.gold{background:#FFF8E1;color:#E65100;}
+    .pill.red{background:var(--danger-light);color:var(--danger);}
+    .pill.blue{background:#e3eeff;color:#1565C0;}
+    .pill.gray{background:#F1F5F9;color:var(--text-secondary);}
+
+    /* FORM */
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+    .form-group{margin-bottom:14px;}
+    .form-group label{display:block;font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;}
+    .form-control{width:100%;padding:10px 12px;border:1px solid var(--border-mid);border-radius:var(--radius-sm);font-family:inherit;font-size:13.5px;background:#fff;color:var(--text-primary);}
+    .form-control:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-light);}
+    textarea.form-control{resize:vertical;min-height:70px;}
+    .upload-box{border:2px dashed var(--border-mid);border-radius:var(--radius-md);padding:22px;text-align:center;color:var(--text-muted);cursor:pointer;transition:border-color var(--transition),background var(--transition);}
+    .upload-box:hover{border-color:var(--teal);background:var(--teal-light);}
+    .upload-box i{font-size:24px;margin-bottom:8px;display:block;color:var(--teal);}
+    .upload-box.has-file{border-style:solid;border-color:var(--teal);background:var(--teal-light);color:var(--teal-dark);}
+
+    /* TWO COL LAYOUT */
+    .two-col{display:grid;grid-template-columns:1.5fr 1fr;gap:20px;align-items:start;}
+
+    /* ALLERGY BARS */
+    .allergy-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+    .allergy-bar-label{font-size:12.5px;width:120px;flex-shrink:0;color:var(--text-secondary);}
+    .allergy-bar-track{flex:1;height:8px;background:#F1F5F9;border-radius:8px;overflow:hidden;}
+    .allergy-bar-fill{height:100%;border-radius:8px;}
+    .allergy-bar-count{width:22px;text-align:right;font-size:12px;font-weight:700;color:var(--text-primary);}
+    .condition-badge{display:inline-flex;align-items:center;gap:5px;background:var(--danger-light);color:var(--danger);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;}
+
+    .gizi-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px;}
+    .gizi-row:last-child{border-bottom:none;}
+    .gizi-row span:last-child{font-weight:700;}
+    .progress-track{height:8px;background:#F1F5F9;border-radius:8px;margin-top:6px;overflow:hidden;}
+    .progress-fill{height:100%;background:var(--teal);border-radius:8px;}
+
+    .ingredient-tag{display:inline-flex;align-items:center;gap:6px;background:var(--teal-light);color:var(--teal-dark);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:600;margin:0 6px 6px 0;}
+    .ingredient-tag.risk{background:var(--danger-light);color:var(--danger);}
+    .ingredient-tag button{background:none;border:none;color:inherit;cursor:pointer;font-size:11px;opacity:.7;}
+
+    /* TABS */
+    .tab-row{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:16px;}
+    .tab-btn{padding:9px 14px;font-size:13px;font-weight:600;color:var(--text-secondary);cursor:pointer;border-bottom:2px solid transparent;}
+    .tab-btn.active{color:var(--teal-dark);border-bottom-color:var(--teal);}
+    .tab-content{display:none;}
+    .tab-content.active{display:block;}
+
+    /* MODAL */
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,20,.55);z-index:2000;align-items:center;justify-content:center;padding:20px;}
+    .modal-overlay.show{display:flex;animation:fadeIn .18s ease;}
+    @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+    .modal-box{background:#fff;border-radius:var(--radius-lg);width:100%;max-width:640px;max-height:88vh;overflow-y:auto;box-shadow:var(--shadow-md);}
+    .modal-head{background:linear-gradient(135deg,var(--teal),var(--teal-mid));color:#fff;padding:18px 22px;border-radius:var(--radius-lg) var(--radius-lg) 0 0;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+    .modal-head h3{font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px;}
+    .modal-head p{font-size:11.5px;opacity:.9;margin-top:2px;}
+    .modal-close{background:rgba(255,255,255,.2);border:none;color:#fff;width:26px;height:26px;border-radius:50%;cursor:pointer;flex-shrink:0;}
+    .modal-body{padding:20px 22px;}
+    .fuzzy-alert{background:var(--teal-light);border:1px solid #b7e4d3;border-radius:var(--radius-md);padding:12px 14px;display:flex;gap:10px;align-items:flex-start;font-size:12.5px;color:var(--teal-dark);margin-bottom:16px;}
+    .fuzzy-alert i{color:var(--teal);margin-top:2px;}
+
+    /* COMPLAINT CARD */
+    .complaint-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;margin-bottom:12px;}
+    .complaint-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px;}
+    .complaint-title{font-size:13.5px;font-weight:700;}
+    .complaint-id{font-size:11px;color:var(--text-muted);}
+    .complaint-desc{font-size:13px;color:var(--text-secondary);margin:8px 0;line-height:1.6;background:var(--bg-page);border-radius:var(--radius-sm);padding:10px 12px;}
+    .complaint-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+    .reply-box{margin-top:12px;border-top:1px dashed var(--border);padding-top:12px;}
+    .reply-box textarea{width:100%;border:1px solid var(--border-mid);border-radius:var(--radius-sm);padding:9px 11px;font-family:inherit;font-size:13px;resize:vertical;min-height:54px;}
+    .reply-existing{background:var(--teal-light);border-radius:var(--radius-sm);padding:10px 12px;font-size:12.5px;color:var(--teal-dark);margin-top:8px;}
+
+    .empty-state{text-align:center;padding:40px 20px;color:var(--text-muted);}
+    .empty-state i{font-size:32px;margin-bottom:10px;display:block;}
+
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:#1f2a24;color:#fff;padding:12px 20px;border-radius:var(--radius-md);font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;z-index:3000;opacity:0;transition:all .25s ease;box-shadow:var(--shadow-md);}
+    .toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+    .toast.success i{color:#4ade80;} .toast.error i{color:#f87171;} .toast.info i{color:#60a5fa;}
+
+    @media(max-width:1100px){.kpi-grid{grid-template-columns:repeat(2,1fr);} .two-col{grid-template-columns:1fr;} .form-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+    <div class="topbar-brand">
+        <div class="brand-icon" style="background: rgba(255,255,255,0.2); overflow: hidden;"><img src="logo.png" alt="Logo" style="width: 100%; height: 100%; object-fit: cover;"></div>
+        <div>
+            <div class="brand-name">SWARASA VENDOR</div>
+            <div class="brand-sub">AI Prevention & Compliance Gateway</div>
+        </div>
+    </div>
+    <div class="topbar-location">
+        <div class="location-pill"><i class="fa-solid fa-shop"></i> UD Gizi Prima Bali (V-00456)</div>
+    </div>
+    <div class="topbar-actions">
+        <button class="topbar-btn" onclick="toggleDropdown('notif-dd')"><i class="fa-regular fa-bell"></i><span class="badge-notif">3</span></button>
+        <div class="dropdown" id="notif-dd">
+            <div class="dropdown-header"><div class="dropdown-name">Notifikasi</div></div>
+            <div class="dropdown-item"><i class="fa-solid fa-triangle-exclamation" style="color:var(--danger)"></i> 2 laporan baru menunggu respons</div>
+            <div class="dropdown-item"><i class="fa-solid fa-clock" style="color:var(--warning)"></i> Validasi Tahap 04 sedang diproses</div>
+            <div class="dropdown-item"><i class="fa-solid fa-star" style="color:var(--teal)"></i> Rating kepuasan minggu ini naik ke 4.4</div>
+        </div>
+        <button class="avatar-btn" onclick="toggleDropdown('user-dd')">GP</button>
+        <div class="dropdown" id="user-dd">
+            <div class="dropdown-header"><div class="dropdown-name">Gede Putra</div><div class="dropdown-role">Admin Vendor · UD Gizi Prima Bali</div></div>
+            <div class="dropdown-item"><i class="fa-regular fa-user"></i> Profil Vendor</div>
+            <div class="dropdown-item"><i class="fa-solid fa-gear"></i> Pengaturan</div>
+            <div class="dropdown-item text-danger"><i class="fa-solid fa-right-from-bracket"></i> Keluar</div>
+        </div>
+    </div>
+</div>
+
+<div class="app-layout">
+    <div class="sidebar">
+        <div class="sidebar-section-label">Menu Vendor</div>
+        <div class="nav-item active" data-page="dashboard" onclick="navigate('dashboard')"><i class="fa-solid fa-chart-pie"></i> Dashboard</div>
+        <div class="nav-item" data-page="jadwal" onclick="navigate('jadwal')"><i class="fa-regular fa-calendar-check"></i> Jadwal & Pengiriman</div>
+        <div class="nav-item" data-page="menu" onclick="navigate('menu')"><i class="fa-solid fa-utensils"></i> Manajemen Menu</div>
+        <div class="nav-item" data-page="laporan" onclick="navigate('laporan')"><i class="fa-regular fa-clipboard"></i> Laporan Penerima <span class="nav-badge" id="laporan-badge">2</span></div>
+        <div class="sidebar-section-label">Kepatuhan</div>
+        <div class="nav-item" data-page="audit" onclick="navigate('audit')"><i class="fa-solid fa-shield-heart"></i> Standar Gizi & Audit</div>
+        <div class="nav-item" data-page="performa" onclick="navigate('performa')"><i class="fa-solid fa-chart-line"></i> Performa & Umpan Balik</div>
+        <div class="sidebar-bottom">
+            <div class="score-card">
+                <p>Skor Kepatuhan Vendor</p>
+                <div class="score-val" id="score-display"><i class="fa-solid fa-circle-check"></i> <span id="score-num">88</span> / 100</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+
+        <!-- ============ DASHBOARD ============ -->
+        <div class="page active" id="page-dashboard">
+            <div class="page-header">
+                <div><div class="page-title">Dashboard Vendor</div><div class="page-sub">Ringkasan performa dan pengajuan Anda</div></div>
+            </div>
+
+            <div class="card">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                    <div>
+                        <div style="font-size:16px;font-weight:700;">Status Pengajuan SPPG Anda</div>
+                        <div class="page-sub">Ikuti 8 langkah standar operasional untuk menjadi Mitra Resmi Badan Gizi Nasional.</div>
+                    </div>
+                    <span class="tracker-status-badge"><i class="fa-regular fa-hourglass-half"></i> Menunggu Admin Pusat</span>
+                </div>
+                <div class="tracker-steps">
+                    <div class="tracker-step"><div class="step-circle done"><i class="fa-solid fa-check"></i></div><div class="step-label">01. Pendaftaran Calon Mitra</div></div>
+                    <div class="step-connector done"></div>
+                    <div class="tracker-step"><div class="step-circle done"><i class="fa-solid fa-check"></i></div><div class="step-label">02. Validasi Data Mitra</div></div>
+                    <div class="step-connector done"></div>
+                    <div class="tracker-step"><div class="step-circle done"><i class="fa-solid fa-check"></i></div><div class="step-label">03. Persiapan SPPG</div></div>
+                    <div class="step-connector done"></div>
+                    <div class="tracker-step"><div class="step-circle active">04</div><div class="step-label active-lbl">04. Validasi Persiapan</div></div>
+                    <div class="step-connector"></div>
+                    <div class="tracker-step"><div class="step-circle pending">05</div><div class="step-label">05. Survey Lapangan</div></div>
+                    <div class="step-connector"></div>
+                    <div class="tracker-step"><div class="step-circle pending">06</div><div class="step-label">06. Rapat Komite Kelayakan</div></div>
+                    <div class="step-connector"></div>
+                    <div class="tracker-step"><div class="step-circle pending">07</div><div class="step-label">07. Persiapan Akhir Dokumen</div></div>
+                    <div class="step-connector"></div>
+                    <div class="tracker-step"><div class="step-circle pending">08</div><div class="step-label">08. SPPG Operasional</div></div>
+                </div>
+                <div class="status-box">
+                    <i class="fa-regular fa-hourglass-half"></i>
+                    <div>
+                        <strong>Status Saat Ini: Menunggu Validasi Persiapan (Tahap 04)</strong>
+                        <p>Tim verifikasi BGN sedang meninjau dokumen kelengkapan foto dan video persiapan SPPG Anda. Proses ini memakan waktu maksimal 2x24 jam kerja. Setelah disetujui, petugas akan menjadwalkan Survey Lapangan.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lock-label"><i class="fa-solid fa-lock"></i> Terkunci (Menunggu SPPG Operasional)</div>
+            <div class="kpi-grid" style="opacity:.65;">
+                <div class="kpi-card"><div class="kpi-icon teal"><i class="fa-solid fa-box-open"></i></div><div><div class="kpi-val">450</div><div class="kpi-lbl">Target Porsi Hari Ini</div></div></div>
+                <div class="kpi-card"><div class="kpi-icon blue"><i class="fa-solid fa-truck"></i></div><div><div class="kpi-val">450</div><div class="kpi-lbl">Porsi Terkirim</div></div></div>
+                <div class="kpi-card"><div class="kpi-icon gold"><i class="fa-solid fa-star"></i></div><div><div class="kpi-val">4.4</div><div class="kpi-lbl">Rating Kepuasan</div></div></div>
+                <div class="kpi-card"><div class="kpi-icon red"><i class="fa-solid fa-triangle-exclamation"></i></div><div><div class="kpi-val">2</div><div class="kpi-lbl">Komplain Aktif</div></div></div>
+            </div>
+
+            <div class="card">
+                <div class="section-title"><i class="fa-regular fa-clock"></i> Jadwal Pengiriman Hari Ini (18 Jul 2026)</div>
+                <table>
+                    <tr><th>Instansi Tujuan</th><th>Jam Kirim</th><th>Porsi</th><th>Status</th></tr>
+                    <tr><td>SDN 1 Denpasar</td><td>07:30</td><td>150</td><td><span class="pill green">Terkirim</span></td></tr>
+                    <tr><td>SDN 3 Denpasar Selatan</td><td>08:00</td><td>180</td><td><span class="pill green">Terkirim</span></td></tr>
+                    <tr><td>SMPN 2 Denpasar</td><td>08:30</td><td>120</td><td><span class="pill gold">Dalam Perjalanan</span></td></tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- ============ JADWAL & PENGIRIMAN ============ -->
+        <div class="page" id="page-jadwal">
+            <div class="page-header">
+                <div><div class="page-title">Jadwal & Pengiriman</div><div class="page-sub">Catat bukti pengiriman, jumlah porsi, dan instansi tujuan secara real-time</div></div>
+            </div>
+
+            <div class="two-col">
+                <div class="card">
+                    <div class="section-title"><i class="fa-solid fa-truck-fast"></i> Catat Pengiriman Baru</div>
+                    <div class="form-grid">
+                        <div class="form-group"><label>Instansi Tujuan</label>
+                            <select class="form-control" id="delivery-school">
+                                <option>SDN 1 Denpasar</option><option>SDN 3 Denpasar Selatan</option><option>SMPN 2 Denpasar</option><option>SMAN 4 Denpasar</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>Jumlah Porsi</label><input class="form-control" type="number" id="delivery-porsi" value="150"></div>
+                        <div class="form-group"><label>Jam Pengiriman</label><input class="form-control" type="time" id="delivery-time" value="07:30"></div>
+                        <div class="form-group"><label>Sopir / PIC Pengiriman</label><input class="form-control" type="text" id="delivery-pic" placeholder="Nama sopir/PIC"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Foto Bukti Pengiriman</label>
+                        <div class="upload-box" id="upload-box" onclick="simulateUpload()">
+                            <i class="fa-solid fa-camera"></i>
+                            <div id="upload-text">Klik untuk unggah foto bukti pengiriman (JPG/PNG, maks 5MB)</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="addDelivery()"><i class="fa-solid fa-paper-plane"></i> Simpan & Catat Pengiriman</button>
+                </div>
+
+                <div class="card">
+                    <div class="section-title"><i class="fa-solid fa-chart-simple"></i> Ringkasan Hari Ini</div>
+                    <div class="gizi-row"><span>Total Target Porsi</span><span>450</span></div>
+                    <div class="gizi-row"><span>Porsi Terkirim</span><span id="sum-terkirim">450</span></div>
+                    <div class="gizi-row"><span>Instansi Dilayani</span><span>3 Sekolah</span></div>
+                    <div class="gizi-row"><span>Status Kepatuhan Jadwal</span><span style="color:var(--success)">Tepat Waktu</span></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="section-title"><i class="fa-regular fa-clock"></i> Riwayat Pengiriman</div>
+                <table id="delivery-table">
+                    <tr><th>Waktu</th><th>Instansi</th><th>Porsi</th><th>PIC</th><th>Bukti Foto</th><th>Status</th></tr>
+                    <tr><td>07:30</td><td>SDN 1 Denpasar</td><td>150</td><td>I Wayan Sudarma</td><td><i class="fa-regular fa-image" style="color:var(--teal)"></i> Terlampir</td><td><span class="pill green">Terkirim</span></td></tr>
+                    <tr><td>08:00</td><td>SDN 3 Denpasar Selatan</td><td>180</td><td>Made Ariawan</td><td><i class="fa-regular fa-image" style="color:var(--teal)"></i> Terlampir</td><td><span class="pill green">Terkirim</span></td></tr>
+                    <tr><td>08:30</td><td>SMPN 2 Denpasar</td><td>120</td><td>Kadek Sujana</td><td><span style="color:var(--text-muted)">—</span></td><td><span class="pill gold">Dalam Perjalanan</span></td></tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- ============ MANAJEMEN MENU ============ -->
+        <div class="page" id="page-menu">
+            <div class="page-header">
+                <div><div class="page-title">Manajemen Menu & AI Menu Safety Gate</div><div class="page-sub">Susun rencana menu harian Anda dan validasi silang terhadap profil alergen siswa secara preventif</div></div>
+            </div>
+
+            <div class="two-col">
+                <div class="card">
+                    <div class="section-title"><i class="fa-regular fa-calendar"></i> Penyusunan Menu Harian</div>
+                    <div class="form-group"><label>Pilih Sekolah Sasaran</label>
+                        <select class="form-control" id="menu-school" onchange="renderAllergyProfile()">
+                            <option value="sdn1">SDN 1 Denpasar (Denpasar)</option>
+                            <option value="sdn3">SDN 3 Denpasar Selatan (Denpasar)</option>
+                            <option value="smpn2">SMPN 2 Denpasar (Denpasar)</option>
+                        </select>
+                    </div>
+
+                    <div class="card" style="background:var(--teal-light);border-color:#b7e4d3;margin-bottom:16px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                            <div style="font-weight:700;font-size:13px;color:var(--teal-dark);"><i class="fa-solid fa-shield-heart"></i> Profil Kondisi Khusus Peserta Didik</div>
+                            <span class="condition-badge" id="condition-total">33 kondisi</span>
+                        </div>
+                        <div id="allergy-bars"></div>
+                    </div>
+
+                    <div class="tab-row">
+                        <div class="tab-btn active" onclick="switchTab(this,'manual')"><i class="fa-solid fa-list"></i> Input Manual Dropdown</div>
+                        <div class="tab-btn" onclick="switchTab(this,'fuzzy')"><i class="fa-solid fa-wand-magic-sparkles"></i> Upload / Tempel Teks (AI Fuzzy)</div>
+                    </div>
+
+                    <div class="tab-content active" id="tab-manual">
+                        <div class="form-group"><label>Pilih Bahan dari Daftar</label>
+                            <div style="display:flex;gap:8px;">
+                                <select class="form-control" id="manual-ingredient">
+                                    <option>Nasi Putih</option><option>Ayam Goreng</option><option>Saus Bumbu Kacang</option>
+                                    <option>Tahu Goreng</option><option>Tempe Goreng</option><option>Kecap Manis Kedelai</option>
+                                    <option>Tumis Kangkung</option><option>Buah Pisang</option>
+                                </select>
+                                <button class="btn btn-primary" onclick="addManualIngredient()"><i class="fa-solid fa-plus"></i> Tambah</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-content" id="tab-fuzzy">
+                        <div class="form-group"><label>Tempel / Ketik Daftar Bahan (pisahkan dengan koma)</label>
+                            <textarea class="form-control" id="fuzzy-input" placeholder='Contoh: saus kcg, bihun, tahu, kecap'>saus kcg, bihun, tahu, kecap</textarea>
+                        </div>
+                        <button class="btn btn-primary" onclick="runFuzzyMatch()"><i class="fa-solid fa-wand-magic-sparkles"></i> Jalankan AI Fuzzy Matching</button>
+                        <p style="font-size:11.5px;color:var(--text-muted);margin-top:8px;">Menggunakan algoritma Jaro-Winkler untuk menyelaraskan singkatan/typo dengan kamus resmi BGN.</p>
+                    </div>
+
+                    <div style="margin-top:16px;">
+                        <label style="display:block;font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;margin-bottom:8px;">Bahan Menu Hari Ini</label>
+                        <div id="ingredient-tags"></div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="card">
+                        <div class="section-title"><i class="fa-solid fa-flask"></i> Analisis Kandungan Gizi (Live)</div>
+                        <div class="gizi-row"><span>Kalori</span><span id="gizi-kalori">620 kcal</span></div>
+                        <div class="gizi-row"><span>Protein</span><span id="gizi-protein">31 g</span></div>
+                        <div class="gizi-row"><span>Lemak</span><span id="gizi-lemak">25.7 g</span></div>
+                        <div class="gizi-row"><span>Std. Kalori BGN</span><span>550 kcal</span></div>
+                        <div style="font-size:11px;color:var(--text-muted);margin-top:8px;">Progress Kalori</div>
+                        <div class="progress-track"><div class="progress-fill" style="width:100%"></div></div>
+                    </div>
+                    <div class="card" style="background:var(--teal-light);border-color:#b7e4d3;">
+                        <div class="section-title" style="color:var(--teal-dark)"><i class="fa-solid fa-robot"></i> Asisten Substitusi Alergen AI</div>
+                        <div id="substitution-panel" style="font-size:12.5px;color:var(--teal-dark);">
+                            <i class="fa-solid fa-circle-check"></i> Belum ada bahan berisiko.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ LAPORAN PENERIMA ============ -->
+        <div class="page" id="page-laporan">
+            <div class="page-header">
+                <div><div class="page-title">Laporan Penerima</div><div class="page-sub">Baca dan respons langsung keluhan/ulasan dari siswa & orang tua</div></div>
+            </div>
+            <div id="laporan-list"></div>
+        </div>
+
+        <!-- ============ STANDAR GIZI & AUDIT ============ -->
+        <div class="page" id="page-audit">
+            <div class="page-header">
+                <div><div class="page-title">Standar Gizi & Audit</div><div class="page-sub">Referensi standar gizi BGN dan hasil audit lapangan terhadap dapur Anda</div></div>
+            </div>
+            <div class="two-col">
+                <div class="card">
+                    <div class="section-title"><i class="fa-solid fa-book-medical"></i> Standar Gizi Nasional (per porsi anak SD)</div>
+                    <table>
+                        <tr><th>Komponen</th><th>Standar Minimum</th></tr>
+                        <tr><td>Kalori</td><td>500 – 600 kcal</td></tr>
+                        <tr><td>Protein</td><td>15 – 20 g</td></tr>
+                        <tr><td>Lemak</td><td>≤ 25 g</td></tr>
+                        <tr><td>Karbohidrat</td><td>65 – 85 g</td></tr>
+                        <tr><td>Sayur & Buah</td><td>Wajib pada setiap porsi</td></tr>
+                    </table>
+                </div>
+                <div class="card">
+                    <div class="section-title"><i class="fa-solid fa-clipboard-check"></i> Hasil Audit Terakhir</div>
+                    <div style="text-align:center;padding:10px 0;">
+                        <div style="font-size:34px;font-weight:800;color:var(--danger);font-family:'Plus Jakarta Sans',sans-serif;">54/100</div>
+                        <span class="pill red">Sangat Kurang — Gagal Uji</span>
+                        <p style="font-size:12px;color:var(--text-secondary);margin-top:10px;">Diaudit oleh BGN-Insp-04 pada 12 Juli 2026. Perbaikan wajib diajukan dalam 14 hari kerja.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="section-title"><i class="fa-solid fa-timeline"></i> Riwayat Audit</div>
+                <table>
+                    <tr><th>Tanggal</th><th>Auditor</th><th>Skor</th><th>Hasil</th></tr>
+                    <tr><td>12 Jul 2026</td><td>BGN-Insp-04</td><td>54 / 100</td><td><span class="pill red">Gagal Uji</span></td></tr>
+                    <tr><td>15 Mar 2026</td><td>BGN-Insp-01</td><td>81 / 100</td><td><span class="pill green">Lulus</span></td></tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- ============ PERFORMA & UMPAN BALIK ============ -->
+        <div class="page" id="page-performa">
+            <div class="page-header">
+                <div><div class="page-title">Performa & Umpan Balik</div><div class="page-sub">Ringkasan performa operasional dan tren kepuasan penerima</div></div>
+            </div>
+            <div class="kpi-grid">
+                <div class="kpi-card"><div class="kpi-icon teal"><i class="fa-solid fa-gauge-high"></i></div><div><div class="kpi-val" id="score-num2">88</div><div class="kpi-lbl">Skor Kepatuhan</div></div></div>
+                <div class="kpi-card"><div class="kpi-icon gold"><i class="fa-solid fa-star"></i></div><div><div class="kpi-val">4.4</div><div class="kpi-lbl">Rating Rata-rata</div></div></div>
+                <div class="kpi-card"><div class="kpi-icon blue"><i class="fa-solid fa-truck"></i></div><div><div class="kpi-val">98%</div><div class="kpi-lbl">Ketepatan Waktu</div></div></div>
+                <div class="kpi-card"><div class="kpi-icon red"><i class="fa-solid fa-triangle-exclamation"></i></div><div><div class="kpi-val">2</div><div class="kpi-lbl">Komplain Aktif</div></div></div>
+            </div>
+            <div class="card">
+                <div class="section-title"><i class="fa-solid fa-comments"></i> Umpan Balik Terbaru</div>
+                <div id="feedback-mini"></div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="modal-overlay" id="fuzzy-modal">
+    <div class="modal-box">
+        <div class="modal-head">
+            <div>
+                <h3><i class="fa-solid fa-robot"></i> Hasil AI Fuzzy Matching & Standardisasi</h3>
+                <p>Menyelaraskan draf dengan kamus resmi Badan Gizi Nasional</p>
+            </div>
+            <button class="modal-close" onclick="closeModal('fuzzy-modal')"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="modal-body">
+            <div class="fuzzy-alert" id="fuzzy-summary"></div>
+            <table>
+                <tr><th>Teks Input Anda</th><th>Standardisasi BGN</th><th>Confidence</th></tr>
+                <tbody id="fuzzy-results"></tbody>
+            </table>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:18px;">
+                <span style="font-size:12px;color:var(--text-muted);"><i class="fa-solid fa-circle-check" style="color:var(--teal)"></i> Kepatuhan & Nutrisi Otomatis Terkalkulasi!</span>
+                <button class="btn btn-primary" onclick="applyFuzzyResults()">Gunakan Rencana Menu Ini</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"><i id="toast-icon" class="fa-solid fa-circle-check"></i><span id="toast-msg"></span></div>
+
+<script>
+// ── DB HELPERS ──
+function getDB(){ return (typeof SmartMBG !== 'undefined' && SmartMBG.DB) ? SmartMBG.DB : null; }
+
+// ── NAVIGATION ──
+function navigate(page){
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    document.getElementById('page-'+page).classList.add('active');
+    document.querySelector('.nav-item[data-page="'+page+'"]').classList.add('active');
+    document.querySelectorAll('.dropdown').forEach(d=>d.classList.remove('show'));
+    if(page==='laporan') loadLaporan();
+    if(page==='performa') loadFeedbackMini();
+    if(page==='menu') renderAllergyProfile();
+}
+function toggleDropdown(id){
+    document.querySelectorAll('.dropdown').forEach(d=>{ if(d.id!==id) d.classList.remove('show'); });
+    document.getElementById(id).classList.toggle('show');
+}
+document.addEventListener('click', function(e){
+    if(!e.target.closest('.topbar-actions')){ document.querySelectorAll('.dropdown').forEach(d=>d.classList.remove('show')); }
+});
+function switchTab(el, tab){
+    document.querySelectorAll('.tab-btn').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('tab-'+tab).classList.add('active');
+}
+function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+function showToast(msg,type){
+    const toast=document.getElementById('toast'), icon=document.getElementById('toast-icon'), m=document.getElementById('toast-msg');
+    toast.className='show '+(type||'success');
+    icon.className = type==='success' ? 'fa-solid fa-circle-check' : type==='error' ? 'fa-solid fa-circle-xmark' : 'fa-solid fa-circle-info';
+    m.textContent=msg;
+    clearTimeout(window._t); window._t=setTimeout(()=>toast.classList.remove('show'),3000);
+}
+
+// ── DELIVERY ──
+function simulateUpload(){
+    const box=document.getElementById('upload-box'), txt=document.getElementById('upload-text');
+    box.classList.add('has-file');
+    txt.innerHTML='<i class="fa-solid fa-circle-check" style="color:var(--teal)"></i> bukti_pengiriman_'+Date.now().toString().slice(-4)+'.jpg terunggah';
+}
+function addDelivery(){
+    const school=document.getElementById('delivery-school').value;
+    const porsi=document.getElementById('delivery-porsi').value;
+    const time=document.getElementById('delivery-time').value;
+    const pic=document.getElementById('delivery-pic').value || 'PIC Belum Diisi';
+    const table=document.getElementById('delivery-table');
+    const row=document.createElement('tr');
+    row.innerHTML=`<td>${time}</td><td>${school}</td><td>${porsi}</td><td>${pic}</td><td><i class="fa-regular fa-image" style="color:var(--teal)"></i> Terlampir</td><td><span class="pill green">Terkirim</span></td>`;
+    table.appendChild(row);
+    showToast('Pengiriman ke '+school+' berhasil dicatat.','success');
+    document.getElementById('upload-box').classList.remove('has-file');
+    document.getElementById('upload-text').textContent='Klik untuk unggah foto bukti pengiriman (JPG/PNG, maks 5MB)';
+}
+
+// ── ALLERGY PROFILE (per school) ──
+const allergyProfiles = {
+    sdn1: [{n:'Alergi Kacang',v:1,c:'#D32F2F'},{n:'Alergi Seafood',v:6,c:'#e8621b'},{n:'Alergi Telur',v:9,c:'#F9A825'},{n:'Alergi Susu',v:3,c:'#7c3aed'},{n:'Intoleran Laktosa',v:1,c:'#0ea5e9'},{n:'Intoleran Gluten',v:2,c:'#0d9e75'},{n:'Fobia Ikan',v:7,c:'#475569'},{n:'Fobia Bawang',v:4,c:'#64748b'}],
+    sdn3: [{n:'Alergi Kacang',v:3,c:'#D32F2F'},{n:'Alergi Seafood',v:2,c:'#e8621b'},{n:'Alergi Telur',v:4,c:'#F9A825'},{n:'Alergi Susu',v:1,c:'#7c3aed'},{n:'Intoleran Laktosa',v:2,c:'#0ea5e9'},{n:'Intoleran Gluten',v:1,c:'#0d9e75'},{n:'Fobia Ikan',v:2,c:'#475569'},{n:'Fobia Bawang',v:1,c:'#64748b'}],
+    smpn2: [{n:'Alergi Kacang',v:2,c:'#D32F2F'},{n:'Alergi Seafood',v:5,c:'#e8621b'},{n:'Alergi Telur',v:3,c:'#F9A825'},{n:'Alergi Susu',v:2,c:'#7c3aed'},{n:'Intoleran Laktosa',v:0,c:'#0ea5e9'},{n:'Intoleran Gluten',v:1,c:'#0d9e75'},{n:'Fobia Ikan',v:1,c:'#475569'},{n:'Fobia Bawang',v:0,c:'#64748b'}]
+};
+function renderAllergyProfile(){
+    const school=document.getElementById('menu-school').value;
+    const data=allergyProfiles[school];
+    const max=Math.max(...data.map(d=>d.v),1);
+    const total=data.reduce((s,d)=>s+d.v,0);
+    document.getElementById('condition-total').textContent=total+' kondisi';
+    document.getElementById('allergy-bars').innerHTML = data.map(d=>`
+        <div class="allergy-bar-row">
+            <div class="allergy-bar-label">${d.n}</div>
+            <div class="allergy-bar-track"><div class="allergy-bar-fill" style="width:${(d.v/max*100)}%;background:${d.c}"></div></div>
+            <div class="allergy-bar-count">${d.v}</div>
+        </div>`).join('');
+    checkAllRisk();
+}
+
+// ── INGREDIENT MANAGEMENT ──
+let currentIngredients = ['Nasi Putih','Ayam Goreng','Tumis Kangkung','Buah Pisang'];
+const bgnDictionary = {
+    'nasi putih':{name:'Nasi Putih',risk:null,kcal:180,protein:3,fat:0.3},
+    'ayam goreng':{name:'Ayam Goreng',risk:null,kcal:220,protein:18,fat:14},
+    'saus bumbu kacang':{name:'Saus Bumbu Kacang',risk:'Alergi Kacang',kcal:90,protein:3,fat:7},
+    'saus kacang':{name:'Saus Bumbu Kacang',risk:'Alergi Kacang',kcal:90,protein:3,fat:7},
+    'tahu goreng':{name:'Tahu Goreng',risk:null,kcal:80,protein:6,fat:5},
+    'tahu':{name:'Tahu Goreng',risk:null,kcal:80,protein:6,fat:5},
+    'tempe goreng':{name:'Tempe Goreng',risk:null,kcal:95,protein:7,fat:5},
+    'kecap manis kedelai':{name:'Kecap Manis Kedelai',risk:null,kcal:20,protein:1,fat:0},
+    'kecap':{name:'Kecap Manis Kedelai',risk:null,kcal:20,protein:1,fat:0},
+    'tumis kangkung':{name:'Tumis Kangkung',risk:null,kcal:60,protein:2,fat:3},
+    'buah pisang':{name:'Buah Pisang',risk:null,kcal:90,protein:1,fat:0.3},
+    'bihun':{name:'Bihun',risk:null,kcal:110,protein:2,fat:0.5,custom:true},
+    'saus tomat':{name:'Saus Tomat',risk:null,kcal:20,protein:1,fat:0},
+    'saus tmt':{name:'Saus Tomat',risk:null,kcal:20,protein:1,fat:0},
+    'kacang hijau':{name:'Kacang Hijau',risk:null,kcal:120,protein:7,fat:0.5},
+    'kcg hijo':{name:'Kacang Hijau',risk:null,kcal:120,protein:7,fat:0.5},
+    'daging ayam':{name:'Daging Ayam',risk:null,kcal:295,protein:14,fat:25},
+    'daging sapi':{name:'Daging Sapi',risk:null,kcal:250,protein:26,fat:15},
+    'telur ayam':{name:'Telur Ayam',risk:'Alergi Telur',kcal:155,protein:13,fat:11},
+    'ikan nila':{name:'Ikan Nila',risk:null,kcal:96,protein:20,fat:1.7},
+    'ikan lele':{name:'Ikan Lele',risk:null,kcal:105,protein:18,fat:2.9},
+    'ikan kembung':{name:'Ikan Kembung',risk:null,kcal:167,protein:21,fat:9},
+    'ikan tongkol':{name:'Ikan Tongkol',risk:null,kcal:100,protein:22,fat:1},
+    'udang':{name:'Udang',risk:'Alergi Seafood',kcal:99,protein:24,fat:0.3},
+    'cumi':{name:'Cumi-Cumi',risk:'Alergi Seafood',kcal:90,protein:16,fat:1},
+    'susu sapi':{name:'Susu Sapi',risk:'Alergi Susu',kcal:61,protein:3.2,fat:3.3},
+    'kacang tanah':{name:'Kacang Tanah',risk:'Alergi Kacang',kcal:567,protein:26,fat:49},
+    'kacang merah':{name:'Kacang Merah',risk:null,kcal:333,protein:24,fat:0.8},
+    'bayam':{name:'Bayam',risk:null,kcal:23,protein:3,fat:0.4},
+    'sawi hijau':{name:'Sawi Hijau',risk:null,kcal:20,protein:2,fat:0.2},
+    'wortel':{name:'Wortel',risk:null,kcal:41,protein:0.9,fat:0.2},
+    'brokoli':{name:'Brokoli',risk:null,kcal:34,protein:2.8,fat:0.4},
+    'buncis':{name:'Buncis',risk:null,kcal:31,protein:1.8,fat:0.2},
+    'kacang panjang':{name:'Kacang Panjang',risk:null,kcal:47,protein:2.8,fat:0.4},
+    'labu siam':{name:'Labu Siam',risk:null,kcal:19,protein:0.8,fat:0.1},
+    'daun singkong':{name:'Daun Singkong',risk:null,kcal:73,protein:6.8,fat:1.2},
+    'jeruk':{name:'Jeruk',risk:null,kcal:47,protein:0.9,fat:0.1},
+    'pepaya':{name:'Pepaya',risk:null,kcal:43,protein:0.5,fat:0.3},
+    'semangka':{name:'Semangka',risk:null,kcal:30,protein:0.6,fat:0.2},
+    'melon':{name:'Melon',risk:null,kcal:34,protein:0.8,fat:0.2},
+    'apel':{name:'Apel',risk:null,kcal:52,protein:0.3,fat:0.2},
+    'jagung':{name:'Jagung',risk:null,kcal:86,protein:3.2,fat:1.2},
+    'kentang':{name:'Kentang',risk:null,kcal:77,protein:2,fat:0.1},
+    'ubi jalar':{name:'Ubi Jalar',risk:null,kcal:86,protein:1.6,fat:0.1},
+    'singkong':{name:'Singkong',risk:null,kcal:160,protein:1.4,fat:0.3},
+    'mie telur':{name:'Mie Telur',risk:'Intoleran Gluten',kcal:138,protein:4.5,fat:2.1},
+    'makaroni':{name:'Makaroni',risk:'Intoleran Gluten',kcal:157,protein:5.8,fat:0.9},
+    'santan':{name:'Santan',risk:null,kcal:230,protein:2.3,fat:24},
+    'minyak goreng':{name:'Minyak Goreng',risk:null,kcal:884,protein:0,fat:100},
+    'mentega':{name:'Mentega',risk:'Alergi Susu',kcal:717,protein:0.9,fat:81},
+    'margarin':{name:'Margarin',risk:null,kcal:717,protein:0.2,fat:81},
+    'bawang merah':{name:'Bawang Merah',risk:'Fobia Bawang',kcal:40,protein:1.1,fat:0.1},
+    'bawang putih':{name:'Bawang Putih',risk:'Fobia Bawang',kcal:149,protein:6.4,fat:0.5},
+    'terasi':{name:'Terasi',risk:'Alergi Seafood',kcal:180,protein:30,fat:2},
+    'sere':{name:'Terasi (Sere)',risk:'Alergi Seafood',kcal:180,protein:30,fat:2},
+    'kesuna':{name:'Bawang Putih (Kesuna)',risk:'Fobia Bawang',kcal:149,protein:6.4,fat:0.5},
+    'bawang':{name:'Bawang Merah (Bawang)',risk:'Fobia Bawang',kcal:40,protein:1.1,fat:0.1},
+    'tabia':{name:'Cabai (Tabia)',risk:null,kcal:40,protein:2,fat:0.2},
+    'isen':{name:'Lengkuas (Isen)',risk:null,kcal:71,protein:1,fat:1},
+    'cekuh':{name:'Kencur (Cekuh)',risk:null,kcal:71,protein:1,fat:1},
+    'jahe':{name:'Jahe',risk:null,kcal:80,protein:1.8,fat:0.8},
+    'kunyit':{name:'Kunyit',risk:null,kcal:354,protein:8,fat:10},
+    'lemo':{name:'Jeruk Limau (Lemo)',risk:null,kcal:30,protein:0.5,fat:0},
+    'limo':{name:'Jeruk Limau (Limo)',risk:null,kcal:30,protein:0.5,fat:0},
+    'base genep':{name:'Bumbu Base Genep',risk:'Fobia Bawang',kcal:100,protein:4,fat:2}
+};
+function addManualIngredient(){
+    const val=document.getElementById('manual-ingredient').value;
+    if(!currentIngredients.includes(val)) currentIngredients.push(val);
+    renderIngredientTags();
+    updateGiziLive();
+    checkAllRisk();
+    showToast(val+' ditambahkan ke menu.','success');
+}
+function removeIngredient(name){
+    currentIngredients=currentIngredients.filter(i=>i!==name);
+    renderIngredientTags(); updateGiziLive(); checkAllRisk();
+}
+function renderIngredientTags(){
+    document.getElementById('ingredient-tags').innerHTML = currentIngredients.map(name=>{
+        const entry=bgnDictionary[name.toLowerCase()];
+        const risky = entry && entry.risk;
+        return `<span class="ingredient-tag ${risky?'risk':''}">${risky?'<i class="fa-solid fa-triangle-exclamation"></i> ':''}${name}<button onclick="removeIngredient('${name}')"><i class="fa-solid fa-xmark"></i></button></span>`;
+    }).join('');
+}
+function updateGiziLive(){
+    let kcal=0, protein=0, fat=0;
+    currentIngredients.forEach(name=>{
+        const e=bgnDictionary[name.toLowerCase()];
+        if(e){ kcal+=e.kcal; protein+=e.protein; fat+=e.fat; }
+    });
+    document.getElementById('gizi-kalori').textContent = kcal+' kcal';
+    document.getElementById('gizi-protein').textContent = protein+' g';
+    document.getElementById('gizi-lemak').textContent = fat.toFixed(1)+' g';
+}
+function checkAllRisk(){
+    const school=document.getElementById('menu-school').value;
+    const profile=allergyProfiles[school];
+    const activeAllergies = profile.filter(p=>p.v>0).map(p=>p.n);
+    const risky = currentIngredients.filter(name=>{
+        const e=bgnDictionary[name.toLowerCase()];
+        return e && e.risk && activeAllergies.includes(e.risk);
+    });
+    const panel=document.getElementById('substitution-panel');
+    if(risky.length===0){
+        panel.innerHTML='<i class="fa-solid fa-circle-check"></i> Belum ada bahan berisiko.';
+    } else {
+        panel.innerHTML = risky.map(name=>{
+            const e=bgnDictionary[name.toLowerCase()];
+            return `<div style="margin-bottom:8px;"><i class="fa-solid fa-triangle-exclamation" style="color:var(--danger)"></i> <strong>${name}</strong> memicu <strong>${e.risk}</strong> (${profile.find(p=>p.n===e.risk).v} siswa terdampak).<br><span style="font-size:11.5px;color:var(--text-secondary)">Rekomendasi substitusi: gunakan bahan bebas alergen setara, mis. saus kedelai tanpa kacang.</span></div>`;
+        }).join('');
+    }
+}
+
+// ── AI FUZZY MATCHING ──
+function levenshtein(a,b){
+    const m=a.length,n=b.length;
+    const dp=Array.from({length:m+1},()=>new Array(n+1).fill(0));
+    for(let i=0;i<=m;i++) dp[i][0]=i;
+    for(let j=0;j<=n;j++) dp[0][j]=j;
+    for(let i=1;i<=m;i++){
+        for(let j=1;j<=n;j++){
+            dp[i][j] = a[i-1]===b[j-1] ? dp[i-1][j-1] : 1+Math.min(dp[i-1][j-1],dp[i-1][j],dp[i][j-1]);
+        }
+    }
+    return dp[m][n];
+}
+function fuzzyBestMatch(token){
+    const t=token.trim().toLowerCase();
+    let best=null, bestScore=0;
+    Object.keys(bgnDictionary).forEach(key=>{
+        const maxLen=Math.max(t.length,key.length);
+        const dist=levenshtein(t,key);
+        let score=1-(dist/maxLen);
+        // boost for substring / abbreviation matches
+        const tTokens=t.split(' '), kTokens=key.split(' ');
+        let overlap=0;
+        tTokens.forEach(tt=>{ 
+            kTokens.forEach(kt=>{ 
+                if(kt.startsWith(tt)||tt.startsWith(kt)) {
+                    overlap++; 
+                } else if(tt.length >= 2 && kt.length > tt.length) {
+                    let i = 0, j = 0;
+                    while(i < tt.length && j < kt.length) {
+                        if(tt[i] === kt[j]) i++;
+                        j++;
+                    }
+                    if(i === tt.length) overlap += 0.8;
+                }
+            }); 
+        });
+        score += overlap*0.15;
+        score = Math.min(score,0.99);
+        if(score>bestScore){ bestScore=score; best=key; }
+    });
+    return { key:best, entry: best?bgnDictionary[best]:null, confidence: Math.round(bestScore*100) };
+}
+let fuzzyResultsCache = [];
+function runFuzzyMatch(){
+    const raw=document.getElementById('fuzzy-input').value;
+    const tokens=raw.split(',').map(t=>t.trim()).filter(Boolean);
+    if(tokens.length===0){ showToast('Masukkan minimal satu bahan.','error'); return; }
+    let newCount=0;
+    fuzzyResultsCache = tokens.map(tok=>{
+        const m=fuzzyBestMatch(tok);
+        const isNew = m.confidence < 60 || (m.entry && m.entry.custom);
+        if(isNew) newCount++;
+        return { input: tok, match: m.entry ? m.entry.name : tok, risk: m.entry ? m.entry.risk : null, confidence: m.entry && m.confidence>=60 ? m.confidence : null, isCustom: isNew, key: m.key };
+    });
+    document.getElementById('fuzzy-summary').innerHTML = `<i class="fa-solid fa-circle-check"></i> AI Fuzzy Matching selesai! Mengidentifikasi ${tokens.length} bahan, menambahkan ${newCount} bahan baru ke rencana draf menu Anda.`;
+    document.getElementById('fuzzy-results').innerHTML = fuzzyResultsCache.map(r=>{
+        const matchHtml = r.isCustom
+            ? `<strong>${r.input}</strong><br><span style="font-size:10.5px;color:var(--text-muted)">(Bahan kustom baru — Belum ada di kamus BGN)</span>`
+            : `<strong>${r.match}</strong>${r.risk?`<br><span style="font-size:10.5px;color:var(--danger)"><i class="fa-solid fa-triangle-exclamation"></i> Pemicu Kondisi Khusus</span>`:''}`;
+        const confHtml = r.isCustom ? `<span class="pill gray">Kustom</span>` : `<span class="pill gold">${r.confidence}% Match</span>`;
+        return `<tr><td>"${r.input}"</td><td>${matchHtml}</td><td>${confHtml}</td></tr>`;
+    }).join('');
+    document.getElementById('fuzzy-modal').classList.add('show');
+}
+function applyFuzzyResults(){
+    fuzzyResultsCache.forEach(r=>{
+        const nameToAdd = r.isCustom ? r.input : r.match;
+        if(!currentIngredients.includes(nameToAdd)) currentIngredients.push(nameToAdd);
+    });
+    renderIngredientTags(); updateGiziLive(); checkAllRisk();
+    closeModal('fuzzy-modal');
+    showToast('Rencana menu diperbarui dengan hasil AI Fuzzy Matching.','success');
+}
+
+// ── LAPORAN PENERIMA (shared localStorage with penerima.html) ──
+async function loadLaporan(){
+    const DB=getDB();
+    let complaints = DB ? await DB.getAllComplaints() : JSON.parse(localStorage.getItem('swarasa_complaints')||'[]');
+    const list=document.getElementById('laporan-list');
+    if(complaints.length===0){
+        list.innerHTML=`<div class="empty-state"><i class="fa-regular fa-clipboard"></i><div>Belum ada laporan dari penerima manfaat.</div></div>`;
+        document.getElementById('laporan-badge').style.display='none';
+        return;
+    }
+    const pending = complaints.filter(c=>c.status==='diproses' && !c.vendorReply).length;
+    document.getElementById('laporan-badge').textContent = pending;
+    document.getElementById('laporan-badge').style.display = pending>0 ? 'inline-block' : 'none';
+
+    list.innerHTML = complaints.map(c=>{
+        const urgencyPill = c.urgency==='Kritis' ? 'red' : c.urgency==='Tinggi' ? 'gold' : c.urgency==='Sedang' ? 'blue' : 'gray';
+        return `
+        <div class="complaint-card">
+            <div class="complaint-top">
+                <div>
+                    <div class="complaint-title">${c.title||c.category}</div>
+                    <div class="complaint-id">${c.id} · ${c.date} · ${c.schoolName||''}</div>
+                </div>
+                <div style="text-align:right">
+                    <span class="pill ${urgencyPill}">${c.urgency}</span>
+                    <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">${'★'.repeat(c.rating)}${'☆'.repeat(5-c.rating)}</div>
+                </div>
+            </div>
+            <div class="complaint-desc">"${c.desc}"</div>
+            <div class="complaint-meta"><span class="pill gray">${c.category}</span><span class="pill ${c.status==='diproses'?'gold':'green'}">${c.status==='diproses'?'Diproses':'Selesai'}</span></div>
+            <div class="reply-box">
+                ${c.vendorReply ? `<div class="reply-existing"><i class="fa-solid fa-reply"></i> <strong>Balasan Anda:</strong> ${c.vendorReply}</div>` : `
+                <textarea id="reply-${c.id}" placeholder="Tulis balasan resmi untuk penerima..."></textarea>
+                <div style="margin-top:8px;display:flex;gap:8px;">
+                    <button class="btn btn-primary btn-sm" onclick="replyLaporan('${c.id}')"><i class="fa-solid fa-reply"></i> Kirim Balasan</button>
+                    <button class="btn btn-outline btn-sm" onclick="resolveLaporan('${c.id}')"><i class="fa-solid fa-check"></i> Tandai Selesai</button>
+                </div>`}
+            </div>
+        </div>`;
+    }).join('');
+}
+async function replyLaporan(id){
+    const val=document.getElementById('reply-'+id).value.trim();
+    if(!val){ showToast('Tulis balasan terlebih dahulu.','error'); return; }
+    const DB=getDB();
+    if(DB){ await DB.updateComplaint(id,{vendorReply:val}); }
+    else{
+        let complaints=JSON.parse(localStorage.getItem('swarasa_complaints')||'[]');
+        const idx=complaints.findIndex(c=>c.id===id);
+        if(idx!==-1){ complaints[idx].vendorReply=val; localStorage.setItem('swarasa_complaints',JSON.stringify(complaints)); }
+    }
+    showToast('Balasan terkirim ke penerima.','success');
+    await loadLaporan();
+}
+async function resolveLaporan(id){
+    const DB=getDB();
+    if(DB){ await DB.updateComplaint(id,{status:'selesai'}); }
+    else{
+        let complaints=JSON.parse(localStorage.getItem('swarasa_complaints')||'[]');
+        const idx=complaints.findIndex(c=>c.id===id);
+        if(idx!==-1){ complaints[idx].status='selesai'; localStorage.setItem('swarasa_complaints',JSON.stringify(complaints)); }
+    }
+    showToast('Laporan ditandai selesai.','success');
+    await loadLaporan();
+}
+async function loadFeedbackMini(){
+    const DB=getDB();
+    let complaints = DB ? await DB.getAllComplaints() : JSON.parse(localStorage.getItem('swarasa_complaints')||'[]');
+    const el=document.getElementById('feedback-mini');
+    if(complaints.length===0){ el.innerHTML='<div class="empty-state"><i class="fa-regular fa-comment"></i><div>Belum ada umpan balik.</div></div>'; return; }
+    el.innerHTML = complaints.slice(0,5).map(c=>`
+        <div style="padding:10px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;">
+            <div><strong style="font-size:13px;">${c.title||c.category}</strong><div style="font-size:11.5px;color:var(--text-muted)">${c.date}</div></div>
+            <div style="color:#F9A825;">${'★'.repeat(c.rating)}${'☆'.repeat(5-c.rating)}</div>
+        </div>`).join('');
+}
+
+// ── SCORE SYNC ──
+async function syncScore(){
+    let score;
+    const DB = getDB();
+    if(DB){
+        const info = await DB.getVendorInfo();
+        score = parseInt(info.score || '88');
+    } else {
+        score = parseInt(localStorage.getItem('swarasa_vendor_score')||'88');
+    }
+    document.getElementById('score-num').textContent = score;
+    const num2=document.getElementById('score-num2'); if(num2) num2.textContent=score;
+    const box=document.getElementById('score-display');
+    box.className='score-val'+(score<60?' danger':score<80?' warn':'');
+}
+
+// ── INIT ──
+document.addEventListener('DOMContentLoaded', function(){
+    renderIngredientTags();
+    updateGiziLive();
+    renderAllergyProfile();
+    loadLaporan();
+    syncScore();
+    setInterval(syncScore, 2000);
+});
+</script>
+</body>
+</html>
