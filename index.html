@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swarasa — Access Hub</title>
+    <link rel="icon" href="logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --primary: #0F172A;
+            --secondary: #475569;
+            --border: #E2E8F0;
+            --surface: #FFFFFF;
+            --background: #F8FAFC;
+            --blue: #2563EB;
+            --blue-hover: #1D4ED8;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--background);
+            color: var(--primary);
+            min-height: 100vh;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .hero-version {
+            display: inline-block;
+            font-size: 12px;
+            color: var(--secondary);
+            font-weight: 500;
+            padding: 4px 10px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+        }
+
+        .hero {
+            padding: 56px 20px 40px;
+            text-align: center;
+        }
+
+        .hero-logo {
+            width: 72px;
+            height: 72px;
+            margin: 0 auto 20px;
+            display: block;
+            object-fit: contain;
+        }
+
+        .hero h1 {
+            font-size: 28px;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+
+        .hero p {
+            font-size: 16px;
+            color: var(--secondary);
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .container {
+            max-width: 560px;
+            margin: 0 auto;
+            padding: 0 20px 64px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--secondary);
+            margin-bottom: 16px;
+        }
+
+        .portal-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .portal-card {
+            display: flex;
+            align-items: center;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px 20px;
+            gap: 16px;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+            transition: border-color 0.15s ease, background-color 0.15s ease;
+        }
+
+        .portal-card:hover {
+            border-color: #CBD5E1;
+            background: #FAFAFA;
+        }
+
+        .portal-icon {
+            font-size: 24px;
+            color: var(--blue);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            transition: color 0.15s ease;
+        }
+
+        .portal-card:hover .portal-icon {
+            color: var(--blue-hover);
+        }
+
+        .portal-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .portal-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 2px;
+        }
+
+        .portal-desc {
+            font-size: 14px;
+            color: var(--secondary);
+        }
+
+        .portal-arrow {
+            color: var(--secondary);
+            font-size: 16px;
+            flex-shrink: 0;
+            transition: color 0.15s ease;
+        }
+        
+        .portal-card:hover .portal-arrow {
+            color: var(--primary);
+        }
+
+        footer {
+            margin-top: 48px;
+            text-align: center;
+            font-size: 12px;
+            color: var(--secondary);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 24px;
+            }
+            .hero p {
+                font-size: 14px;
+            }
+            .portal-card {
+                padding: 16px;
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="hero">
+        <img src="logo.png" alt="Swarasa Logo" class="hero-logo">
+        <h1>Swarasa Access Hub</h1>
+        <div class="hero-version">Prototype v1.0</div>
+        <p>Satu pintu akses seluruh ekosistem MBG</p>
+    </div>
+
+    <main class="container">
+        <div class="section-title">Pilih Portal</div>
+        
+        <div class="portal-list">
+            <a class="portal-card" href="https://bungatest.github.io/swarasa/bgn.html">
+                <div class="portal-icon"><i class="fa-solid fa-building-columns"></i></div>
+                <div class="portal-content">
+                    <div class="portal-title">BGN</div>
+                    <div class="portal-desc">Dashboard Badan Gizi Nasional</div>
+                </div>
+                <div class="portal-arrow">&rarr;</div>
+            </a>
+
+            <a class="portal-card" href="https://bungatest.github.io/swarasa/penerima.html">
+                <div class="portal-icon"><i class="fa-solid fa-utensils"></i></div>
+                <div class="portal-content">
+                    <div class="portal-title">Penerima Manfaat</div>
+                    <div class="portal-desc">Menu, status distribusi & pelaporan</div>
+                </div>
+                <div class="portal-arrow">&rarr;</div>
+            </a>
+
+            <a class="portal-card" href="https://bungatest.github.io/swarasa/vendor.html">
+                <div class="portal-icon"><i class="fa-solid fa-kitchen-set"></i></div>
+                <div class="portal-content">
+                    <div class="portal-title">SPPG</div>
+                    <div class="portal-desc">Operasional dapur dan supplier</div>
+                </div>
+                <div class="portal-arrow">&rarr;</div>
+            </a>
+
+            <a class="portal-card" href="https://drive.google.com/drive/folders/1D8sOcUlY2PG9dfBsYFU1BkMym778wgUO?usp=drive_link" target="_blank" rel="noopener">
+                <div class="portal-icon"><i class="fa-solid fa-folder-open"></i></div>
+                <div class="portal-content">
+                    <div class="portal-title">Dokumentasi</div>
+                    <div class="portal-desc">Proposal, Demo, dan Referensi</div>
+                </div>
+                <div class="portal-arrow">&rarr;</div>
+            </a>
+        </div>
+
+        <footer>
+            <div>Version 1.0</div>
+            <div>&copy; Swarasa 2026</div>
+        </footer>
+    </main>
+
+</body>
+</html>
